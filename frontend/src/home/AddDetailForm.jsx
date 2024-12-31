@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ import { MdCancel } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 
 const AddDetailForm = () => {
-
     const [isFormValid, setIsFormValid] = useState(false);
     const [isSecondFormValid, setIsSecondFormValid] = useState(false);
     const user = useRecoilValue(userState);
@@ -37,22 +36,25 @@ const AddDetailForm = () => {
         skills_experience: [],
         verbal: '',
         written: '',
-        technical_skills: '',
-        teamwork_skills: '',
+        technical_skills: 0,
+        teamwork_skills: 0,
         analytical_thinking: '',
-        prefer_collaborative_learning: '',
-        prefer_reading: '',
-        time_commitment: ''
+        prefer_collaborative_learning: false,
+        prefer_reading: false,
+        time_commitment: 0,
     });
 
     useEffect(() => {
-        if (user && isDetailsIncomplete(user)) {
+
+        if (user && !user?.hasGivenPreAssessment) {
             setShowAddDetailsDialog(true);
+        } else {
+            navigate('/dashboard');
         }
     }, [user]);
 
-    useEffect(() => {
-        setIsFormValid(
+    const isFormValidMemo = useMemo(() => {
+        return (
             formData.phoneno.length === 10 &&
             formData.gender &&
             formData.dateofbirth &&
@@ -61,98 +63,110 @@ const AddDetailForm = () => {
         );
     }, [formData]);
 
-    useEffect(() => {
-        setIsSecondFormValid(
+    const isSecondFormValidMemo = useMemo(() => {
+        return (
             formData.address &&
             formData.skills_experience.length > 0 &&
             formData.verbal &&
             formData.written &&
-            formData.prefer_reading &&
             formData.time_commitment
         );
     }, [formData]);
 
-    const isDetailsIncomplete = (user) => {
-        return Object.values({
-            phoneno: user.phoneno,
-            gender: user.gender,
-            dateofbirth: user.dateofbirth,
-            collegename: user.collegename,
-            university: user.university,
-            education_level: user.education_level,
-            interested_field: user.interested_field,
-            career_goal: user.career_goal,
-            occupation: user.occupation,
-            address: user.address,
-            skills_experience: user.skills_experience,
-            verbal: user.verbal,
-            written: user.written,
-            technical_skills: user.technical_skills,
-            teamwork_skills: user.teamwork_skills,
-            analytical_thinking: user.analytical_thinking,
-            prefer_collaborative_learning: user.prefer_collaborative_learning,
-            prefer_reading: user.prefer_reading,
-            time_commitment: user.time_commitment
-        }).some((value) => !value);
-    };
+    useEffect(() => {
+        setIsFormValid(isFormValidMemo);
+        setIsSecondFormValid(isSecondFormValidMemo);
+    }, [isFormValidMemo, isSecondFormValidMemo]);
 
     const handleAddSkill = () => {
-        const newTech = {
-            skill: newSkill.trim(),
-            experience: parseInt(newExperience.trim(), 10),
-        };
+        const trimmedSkill = newSkill.trim();
+        const parsedExperience = parseInt(newExperience.trim(), 10);
 
-        if (
-            newTech.skill &&
-            newTech.experience > 0 &&
-            !formData.skills_experience.some((item) => item.skill === newTech.skill)
-        ) {
-            setFormData({
-                ...formData,
-                skills_experience: [...formData.skills_experience, newTech],
-            });
+        if (trimmedSkill && parsedExperience > 0 && !formData.skills_experience.some((item) => item.skill === trimmedSkill)) {
+            setFormData((prev) => ({
+                ...prev,
+                skills_experience: [...prev.skills_experience, { skill: trimmedSkill, experience: parsedExperience }],
+            }));
             setNewSkill('');
             setNewExperience('');
         }
     };
 
     const handleRemoveSkill = (index) => {
-        setFormData({
-            ...formData,
-            skills_experience: formData.skills_experience.filter((_, i) => i !== index),
-        });
+        setFormData((prev) => ({
+            ...prev,
+            skills_experience: prev.skills_experience.filter((_, i) => i !== index),
+        }));
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSaveDetails = async (e) => {
         e.preventDefault();
         setLoading(true);
-        if (!isFormValid) return;
+
+        const firstData = { ...formData, techstack: formData.skills_experience.map((skill) => skill.skill) }
+        const newPayload = {
+            userProfile: {
+                education_level: formData.education_level,
+                occupation: formData.occupation,
+                interested_field: formData.interested_field,
+                career_goal: formData.career_goal,
+                skills_experience: formData.skills_experience,
+            },
+            communicationSkills: {
+                verbal: formData.verbal,
+                written: formData.written,
+            },
+            openEndedQuestions: {
+                technical_skills: formData.technical_skills,
+                teamwork_skills: formData.teamwork_skills,
+                analytical_thinking: formData.analytical_thinking,
+            },
+            miscellanous: {
+                prefer_collaborative_learning: formData.prefer_collaborative_learning,
+                prefer_reading: formData.prefer_reading,
+                time_commitment: formData.time_commitment,
+            },
+        };
 
         try {
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/api/user/adduserdetail`, formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            );
-            toast.success('Details added successfully!');
-            setShowAddDetailsDialog(false);
-            navigate('/');
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            };
+
+            const [addUserResponse, savePreAssessmentResponse] = await Promise.all([
+                axios.post(`${import.meta.env.VITE_BASE_URL}/api/user/adduserdetail`, firstData, { headers }),
+                axios.post(`${import.meta.env.VITE_BASE_URL}/api/preassessment/save-pre-assessment`, newPayload, { headers }),
+            ]);
+
+            if (addUserResponse.status === 200 && savePreAssessmentResponse.status === 201) {
+                console.log('Details added successfully:', addUserResponse.data, savePreAssessmentResponse.data);
+                toast.success('Details added successfully!');
+                setShowAddDetailsDialog(false);
+                setShowNextDetailsDialog(false);
+                navigate('/dashboard');
+            } else {
+                console.error('Failed to save details:', addUserResponse.data, savePreAssessmentResponse.data);
+                throw new Error('Failed to save details');
+            }
         } catch (err) {
-            console.log(err);
+            console.error('Error adding details:', err);
+            if (err.response) {
+                console.error('Response error:', err.response.data);
+            }
             toast.error('Failed to add details. Please try again.');
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div>
-            <Dialog open={showAddDetailsDialog} onOpenChange={() => { }} closeOnEsc={false} closeOnOutsideClick={false}>
+            <Dialog open={showAddDetailsDialog} onOpenChange={() => { }} closeOnEsc={user?.hasGivenPreAssessment} closeOnOutsideClick={user?.hasGivenPreAssessment}>
                 <DialogContent
                     className='max-w-[90vw] md:max-w-[600px] lg:max-w-[800px] p-6 rounded-lg shadow-lg border overflow-y-auto max-h-[90vh]'
                     style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)`, scrollY: "auto" }}>
@@ -473,7 +487,7 @@ const AddDetailForm = () => {
                             </div>
                             <div className='flex flex-col space-y-2'>
                                 <Label htmlFor='written' className='font-medium'>
-                                    Verbal Communication Level
+                                    Written Communication Level
                                 </Label>
 
                                 <Select
@@ -549,22 +563,30 @@ const AddDetailForm = () => {
                                 </Label>
 
                                 <Select
-                                    onValueChange={(value) => handleChange({ target: { name: 'prefer_collaborative_learning', value } })}
+                                    onValueChange={(value) =>
+                                        handleChange({
+                                            target: {
+                                                name: 'prefer_collaborative_learning',
+                                                value: value === "true"
+                                            }
+                                        })
+                                    }
                                     id='prefer_collaborative_learning'
                                     name='prefer_collaborative_learning'
-                                    value={formData.prefer_collaborative_learning}
+                                    value={formData.prefer_collaborative_learning ? "true" : "false"}
                                 >
                                     <SelectTrigger className="inputField">
-                                        <SelectValue placeholder='Select do you prefer collaborative learning' />
+                                        <SelectValue placeholder='Do you prefer collaborative learning?' />
                                     </SelectTrigger>
 
                                     <SelectContent
                                         style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
                                     >
-                                        <SelectItem value="Yes">Yes</SelectItem>
-                                        <SelectItem value="No">No</SelectItem>
+                                        <SelectItem value="true">Yes</SelectItem>
+                                        <SelectItem value="false">No</SelectItem>
                                     </SelectContent>
                                 </Select>
+
                             </div>
                         </div>
 
@@ -575,10 +597,10 @@ const AddDetailForm = () => {
                                 </Label>
 
                                 <Select
-                                    onValueChange={(value) => handleChange({ target: { name: 'prefer_reading', value } })}
+                                    onValueChange={(value) => handleChange({ target: { name: 'prefer_reading', value: value === "true" } })}
                                     id='prefer_reading'
                                     name='prefer_reading'
-                                    value={formData.prefer_reading}
+                                    value={formData.prefer_reading ? 'true' : 'false'}
                                 >
                                     <SelectTrigger className="inputField">
                                         <SelectValue placeholder='Select do you prefer collaborative learning' />
@@ -587,8 +609,8 @@ const AddDetailForm = () => {
                                     <SelectContent
                                         style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
                                     >
-                                        <SelectItem value="Yes">Yes</SelectItem>
-                                        <SelectItem value="No">No</SelectItem>
+                                        <SelectItem value={"true"}>Yes</SelectItem>
+                                        <SelectItem value={"false"}>No</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

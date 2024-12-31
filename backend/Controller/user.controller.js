@@ -1,5 +1,4 @@
 const express = require("express");
-const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
@@ -80,7 +79,6 @@ const register = async (req, res) => {
 const verifyOTP = async (req, res) => {
     try {
         const { email, enteredOTP, password, fullName } = req.body;
-        console.log(req.body)
 
 
         const otpRecord = await OTP.findOne({ email });
@@ -124,7 +122,6 @@ const verifyOTP = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        console.log(req.body);
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -143,7 +140,7 @@ const login = async (req, res) => {
 
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
-        const userDetailsIncomplete = !user.phoneno || !user.gender || !user.dateofbirth || !user.collegename || !user.university || !user.academicyear || !user.address || !user.techstack;
+        const userDetailsIncomplete = !user.hasGivenPreAssessment
 
         res.status(200).json({ message: "Login successful", token, user: { _id: user._id, email: user.email, fullName: user.fullName, photo: user.photo },userDetailsIncomplete });
 
@@ -155,7 +152,10 @@ const login = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        console.log(req.user);
+        const doesUserExist = await User.findById(req.user._id);
+        if (!doesUserExist) {
+            return res.status(404).json({ message: "User not found" });
+        }
         const allowedUpdates = ['username', 'fullName', 'phoneno', 'gender', 'dateofbirth'];
         const updates = {};
 
@@ -175,9 +175,6 @@ const updateProfile = async (req, res) => {
             { new: true } // Return the updated document
         );
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
 
         // Handle profile photo update if a new photo is provided
         if (photo) {

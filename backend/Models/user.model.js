@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema({
             activeChapterIndex: { type: Number, default: 0 }    
         }
     ],
+    hasGivenPreAssessment: {
+        type: Boolean,
+        default: false
+    },
 },
     { timestamps: true });
 

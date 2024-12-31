@@ -11,6 +11,7 @@ import { tokenState } from '@/store/auth';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { FaHandHoldingHeart } from "react-icons/fa";
+import { userState } from '@/store/auth';
 
 const data = {
     navMain: [
@@ -61,7 +62,9 @@ const AppSidebar = () => {
     const handleLogout = () => {
         localStorage.removeItem("token");
         setTokenState("");
+
         toast.success("Logged out successfully");
+
         navigate("/")
     };
 
