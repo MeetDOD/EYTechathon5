@@ -15,8 +15,12 @@ import { useNavigate } from 'react-router-dom';
 const AddDetailForm = () => {
 
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isSecondFormValid, setIsSecondFormValid] = useState(false);
     const user = useRecoilValue(userState);
     const [showAddDetailsDialog, setShowAddDetailsDialog] = useState(false);
+    const [showNextDetailsDialog, setShowNextDetailsDialog] = useState(false);
+    const [newSkill, setNewSkill] = useState('');
+    const [newExperience, setNewExperience] = useState('');
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -25,11 +29,21 @@ const AddDetailForm = () => {
         dateofbirth: '',
         collegename: '',
         university: '',
-        academicyear: '',
+        education_level: '',
+        interested_field: '',
+        career_goal: '',
+        occupation: '',
         address: '',
-        techstack: [],
+        skills_experience: [],
+        verbal: '',
+        written: '',
+        technical_skills: '',
+        teamwork_skills: '',
+        analytical_thinking: '',
+        prefer_collaborative_learning: '',
+        prefer_reading: '',
+        time_commitment: ''
     });
-    const [newTech, setNewTech] = useState('');
 
     useEffect(() => {
         if (user && isDetailsIncomplete(user)) {
@@ -39,11 +53,24 @@ const AddDetailForm = () => {
 
     useEffect(() => {
         setIsFormValid(
-            !Object.values(formData).some((value) => Array.isArray(value) ? value.length === 0 : !value) &&
-            formData.phoneno.length === 10
+            formData.phoneno.length === 10 &&
+            formData.gender &&
+            formData.dateofbirth &&
+            formData.collegename &&
+            formData.career_goal
         );
     }, [formData]);
 
+    useEffect(() => {
+        setIsSecondFormValid(
+            formData.address &&
+            formData.skills_experience.length > 0 &&
+            formData.verbal &&
+            formData.written &&
+            formData.prefer_reading &&
+            formData.time_commitment
+        );
+    }, [formData]);
 
     const isDetailsIncomplete = (user) => {
         return Object.values({
@@ -52,21 +79,48 @@ const AddDetailForm = () => {
             dateofbirth: user.dateofbirth,
             collegename: user.collegename,
             university: user.university,
-            academicyear: user.academicyear,
+            education_level: user.education_level,
+            interested_field: user.interested_field,
+            career_goal: user.career_goal,
+            occupation: user.occupation,
             address: user.address,
-            techstack: user.techstack,
+            skills_experience: user.skills_experience,
+            verbal: user.verbal,
+            written: user.written,
+            technical_skills: user.technical_skills,
+            teamwork_skills: user.teamwork_skills,
+            analytical_thinking: user.analytical_thinking,
+            prefer_collaborative_learning: user.prefer_collaborative_learning,
+            prefer_reading: user.prefer_reading,
+            time_commitment: user.time_commitment
         }).some((value) => !value);
     };
 
-    const handleAddTech = () => {
-        if (newTech.trim() && !formData.techstack.includes(newTech)) {
-            setFormData({ ...formData, techstack: [...formData.techstack, newTech] });
-            setNewTech('');
+    const handleAddSkill = () => {
+        const newTech = {
+            skill: newSkill.trim(),
+            experience: parseInt(newExperience.trim(), 10),
+        };
+
+        if (
+            newTech.skill &&
+            newTech.experience > 0 &&
+            !formData.skills_experience.some((item) => item.skill === newTech.skill)
+        ) {
+            setFormData({
+                ...formData,
+                skills_experience: [...formData.skills_experience, newTech],
+            });
+            setNewSkill('');
+            setNewExperience('');
         }
     };
 
-    const handleRemoveTech = (tech) => {
-        setFormData({ ...formData, techstack: formData.techstack.filter((item) => item !== tech) });
+    const handleRemoveSkill = (index) => {
+        setFormData({
+            ...formData,
+            skills_experience: formData.skills_experience.filter((_, i) => i !== index),
+        });
     };
 
     const handleChange = (e) => {
@@ -154,6 +208,7 @@ const AddDetailForm = () => {
                                     onValueChange={(value) => handleChange({ target: { name: 'gender', value } })}
                                     id='gender'
                                     name='gender'
+                                    value={formData.gender}
                                 >
                                     <SelectTrigger className="inputField">
                                         <SelectValue placeholder='Select your gender' />
@@ -176,6 +231,7 @@ const AddDetailForm = () => {
                                     Date of Birth
                                 </Label>
                                 <Input
+                                    value={formData.dateofbirth}
                                     id='dateofbirth'
                                     name='dateofbirth'
                                     onChange={handleChange}
@@ -190,6 +246,7 @@ const AddDetailForm = () => {
                                 <Input
                                     id='collegename'
                                     name='collegename'
+                                    value={formData.collegename}
                                     placeholder='Enter your college name'
                                     onChange={handleChange}
                                     className='inputField'
@@ -205,26 +262,126 @@ const AddDetailForm = () => {
                                 <Input
                                     id='university'
                                     name='university'
+                                    value={formData.university}
                                     placeholder='Enter your university'
                                     onChange={handleChange}
                                     className='inputField'
                                 />
                             </div>
                             <div className='flex flex-col space-y-2'>
-                                <Label htmlFor='academicyear' className='font-medium'>
-                                    Academic Year
+                                <Label htmlFor='gender' className='font-medium'>
+                                    Current Education
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'education_level', value } })}
+                                    id='education_level'
+                                    name='education_level'
+                                    value={formData.education_level}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Enter your current education level' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="High school">High school</SelectItem>
+                                        <SelectItem value="Undergraduate">Undergraduate</SelectItem>
+                                        <SelectItem value="Graduate">Graduate</SelectItem>
+                                        <SelectItem value="Postgraduate">Postgraduate</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='occupation' className='font-medium'>
+                                    Current Occupation
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'occupation', value } })}
+                                    id='occupation'
+                                    name='occupation'
+                                    value={formData.occupation}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Enter your current occupation' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="Student">Student</SelectItem>
+                                        <SelectItem value="Professional">Professional</SelectItem>
+                                        <SelectItem value="Freelancer">Freelancer</SelectItem>
+                                        <SelectItem value="Unemployed">Unemployed</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='interested_field' className='font-medium'>
+                                    Field/Industry of Interest
                                 </Label>
                                 <Input
-                                    id='academicyear'
-                                    name='academicyear'
-                                    placeholder='Enter your academic year'
+                                    id='interested_field'
+                                    name='interested_field'
+                                    value={formData.interested_field}
+                                    placeholder='Enter your field/industry of interest'
                                     onChange={handleChange}
                                     className='inputField'
-                                    type="number"
+                                    type="text"
                                 />
                             </div>
                         </div>
 
+                        <div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='career_goal' className='font-medium'>
+                                    Ultimate Career Goal
+                                </Label>
+                                <Input
+                                    id='career_goal'
+                                    name='career_goal'
+                                    value={formData.career_goal}
+                                    placeholder='Enter your ultimate career goal'
+                                    onChange={handleChange}
+                                    className='inputField'
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter className='flex justify-center'>
+                            <Button
+                                type='button'
+                                onClick={() => {
+                                    setShowAddDetailsDialog(false);
+                                    setShowNextDetailsDialog(true);
+                                }}
+                                disabled={!isFormValid}
+                                className='px-6 py-3 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed'>
+                                Next
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showNextDetailsDialog} onOpenChange={() => { }} closeOnEsc={false} closeOnOutsideClick={false}>
+                <DialogContent
+                    className='max-w-[90vw] md:max-w-[600px] lg:max-w-[800px] p-6 rounded-lg shadow-lg border overflow-y-auto max-h-[90vh]'
+                    style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)`, scrollY: "auto" }}>
+
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-2xl font-bold text-center">Complete Your Profile</DialogTitle>
+                        <DialogDescription className="text-center text-sm">
+                            Please fill out all required fields to continue with careerinsight
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form className='grid gap-6'>
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 '>
                             <div className='flex flex-col space-y-2'>
                                 <Label htmlFor='address' className='font-medium'>
@@ -233,39 +390,53 @@ const AddDetailForm = () => {
                                 <Input
                                     id='address'
                                     name='address'
+                                    value={formData.address}
                                     placeholder='Enter your address'
                                     onChange={handleChange}
                                     className='inputField'
                                 />
                             </div>
                             <div className="flex flex-col space-y-2">
-                                <Label htmlFor="techstack" className="font-medium">
-                                    Tech Stack
+                                <Label htmlFor="skill" className="font-medium">
+                                    Current Skills and Experience
                                 </Label>
                                 <div className="flex items-center gap-2">
                                     <Input
-                                        id="newTech"
-                                        name="newTech"
-                                        placeholder="Add a technology"
-                                        value={newTech}
-                                        onChange={(e) => setNewTech(e.target.value)}
+                                        id="newSkill"
+                                        name="newSkill"
+                                        value={formData.newSkill}
+                                        placeholder="Add your skill"
+                                        onChange={(e) => setNewSkill(e.target.value)}
                                         className="inputField"
                                     />
-                                    <Button type="button" onClick={handleAddTech} disabled={!newTech.trim()}>
+                                    <Input
+                                        id="experience"
+                                        name="experience"
+                                        value={formData.experience}
+                                        type="number"
+                                        placeholder="Years of experience"
+                                        onChange={(e) => setNewExperience(e.target.value)}
+                                        className="inputField"
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={handleAddSkill}
+                                        disabled={!newSkill.trim() || !newExperience.trim()}
+                                    >
                                         Add
                                     </Button>
                                 </div>
-                                <div className='flex flex-wrap gap-2'>
-                                    {formData.techstack.map((tech, index) => (
+                                <div className="flex flex-wrap gap-2">
+                                    {formData.skills_experience.map((tech, index) => (
                                         <div
                                             key={index}
-                                            className='flex items-center bg-primary text-white px-3 py-1 rounded-full text-sm font-medium'
+                                            className="flex items-center bg-primary text-white px-3 py-1 rounded-full text-sm font-medium"
                                         >
-                                            {tech}
+                                            {tech.skill} ({tech.experience} years)
                                             <button
-                                                type='button'
-                                                className='ml-1'
-                                                onClick={() => handleRemoveTech(tech)}
+                                                type="button"
+                                                className="ml-1"
+                                                onClick={() => handleRemoveSkill(index)}
                                             >
                                                 <MdCancel />
                                             </button>
@@ -275,11 +446,184 @@ const AddDetailForm = () => {
                             </div>
                         </div>
 
-                        <DialogFooter className='flex justify-center'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='verbal' className='font-medium'>
+                                    Verbal Communication Level
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'verbal', value } })}
+                                    id='verbal'
+                                    name='verbal'
+                                    value={formData.verbal}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Select your verbal communcation level' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="Beginner">Beginner</SelectItem>
+                                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                        <SelectItem value="Advanced">Advanced</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='written' className='font-medium'>
+                                    Verbal Communication Level
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'written', value } })}
+                                    id='written'
+                                    name='written'
+                                    value={formData.written}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Select your written communcation level' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="Beginner">Beginner</SelectItem>
+                                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                        <SelectItem value="Advanced">Advanced</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='technical_skills' className='font-medium'>
+                                    Rate your Technical Skills
+                                </Label>
+                                <Input
+                                    id='technical_skills'
+                                    name='technical_skills'
+                                    value={formData.technical_skills}
+                                    placeholder='Rate your Technical Skills out of 5'
+                                    onChange={handleChange}
+                                    className='inputField'
+                                    type="number"
+                                />
+                            </div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='teamwork_skills' className='font-medium'>
+                                    Rate your Teamwork Skills
+                                </Label>
+                                <Input
+                                    id='teamwork_skills'
+                                    name='teamwork_skills'
+                                    value={formData.teamwork_skills}
+                                    placeholder='Rate your Teamwork Skills out of 5'
+                                    onChange={handleChange}
+                                    className='inputField'
+                                    type="number"
+                                />
+                            </div>
+                        </div>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='analytical_thinking' className='font-medium'>
+                                    Rate your Analytical Thinking
+                                </Label>
+                                <Input
+                                    id='analytical_thinking'
+                                    name='analytical_thinking'
+                                    value={formData.analytical_thinking}
+                                    placeholder='Rate your Analytical Thinking out of 5'
+                                    onChange={handleChange}
+                                    className='inputField'
+                                    type="number"
+                                />
+                            </div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='prefer_collaborative_learning' className='font-medium'>
+                                    Do you Prefer Collaborative Learning
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'prefer_collaborative_learning', value } })}
+                                    id='prefer_collaborative_learning'
+                                    name='prefer_collaborative_learning'
+                                    value={formData.prefer_collaborative_learning}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Select do you prefer collaborative learning' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="Yes">Yes</SelectItem>
+                                        <SelectItem value="No">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='prefer_reading' className='font-medium'>
+                                    Do you Prefer Reading
+                                </Label>
+
+                                <Select
+                                    onValueChange={(value) => handleChange({ target: { name: 'prefer_reading', value } })}
+                                    id='prefer_reading'
+                                    name='prefer_reading'
+                                    value={formData.prefer_reading}
+                                >
+                                    <SelectTrigger className="inputField">
+                                        <SelectValue placeholder='Select do you prefer collaborative learning' />
+                                    </SelectTrigger>
+
+                                    <SelectContent
+                                        style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}
+                                    >
+                                        <SelectItem value="Yes">Yes</SelectItem>
+                                        <SelectItem value="No">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className='flex flex-col space-y-2'>
+                                <Label htmlFor='time_commitment' className='font-medium'>
+                                    Enter your Time Commitment
+                                </Label>
+                                <Input
+                                    id='time_commitment'
+                                    name='time_commitment'
+                                    value={formData.time_commitment}
+                                    placeholder='Enter your time commitment in a day'
+                                    onChange={handleChange}
+                                    className='inputField'
+                                    type="number"
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter className='flex'>
+                            <Button
+                                type='button'
+                                variant="secondary"
+                                onClick={() => {
+                                    setShowNextDetailsDialog(false);
+                                    setShowAddDetailsDialog(true);
+                                }}
+                                className='px-6 py-3 font-semibold rounded-lg border'>
+                                Previous
+                            </Button>
+
                             <Button
                                 type='button'
                                 onClick={handleSaveDetails}
-                                disabled={!isFormValid || loading}
+                                disabled={!isSecondFormValid || loading}
                                 className='px-6 py-3 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed'>
                                 {loading ? (
                                     <div className="flex flex-row gap-2 items-center">
