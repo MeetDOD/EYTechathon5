@@ -11,7 +11,7 @@ import { tokenState } from '@/store/auth';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { FaHandHoldingHeart } from "react-icons/fa";
-import { userState } from '@/store/auth';
+import { MdAssessment } from "react-icons/md";
 
 const data = {
     navMain: [
@@ -19,6 +19,11 @@ const data = {
             title: 'Dashboard',
             url: '/dashboard',
             icon: MdSpaceDashboard,
+        },
+        {
+            title: 'AI Assessment',
+            url: '/assessment',
+            icon: MdAssessment,
         },
         {
             title: 'Resume Builder',

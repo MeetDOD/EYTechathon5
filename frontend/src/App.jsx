@@ -31,6 +31,7 @@ import ViewMyResume from './AIResume/ViewMyResume';
 import NotFound from './pages/NotFound';
 import CourseRecommendation from './Dashboard/CourseRecommendation';
 import AddDetailForm from './home/AddDetailForm';
+import DetailAssessment from './Dashboard/DetailAssessment';
 
 const App = () => {
 
@@ -58,6 +59,11 @@ const App = () => {
             <Route path='/dashboard' element={
               <AuthenticatedRoute>
                 <Dashboard />
+              </AuthenticatedRoute>
+            } />
+            <Route path='/assessment' element={
+              <AuthenticatedRoute>
+                <DetailAssessment />
               </AuthenticatedRoute>
             } />
             <Route path='/mycourses' element={
