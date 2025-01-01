@@ -1,5 +1,7 @@
 const { Preassessment } = require('../Models/preassessment.model');
 const { User } = require('../Models/user.model');
+const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI} = require('./ai.controller');
+require("dotenv").config();
 
 
 const sampleBodyForSavePreAssessment = `
@@ -31,6 +33,46 @@ const sampleBodyForSavePreAssessment = `
     }
 }
 `
+
+const getUserPreAssessmentData = async (req, res) => {
+    try {
+        const preassessment = await Preassessment.findOne({ user: req.user._id });
+        if (!preassessment) {
+            return res.status(404).json
+            ({ message: "Pre-assessment data not found." });
+        }
+        return res.status(200).json({
+            message: "Pre-assessment data retrieved successfully.",
+            preassessment: preassessment
+        });
+    } catch (error) {
+        console.error("Error getting user pre-assessment data:", error);
+        return res.status(500).json({
+            error: "An error occurred while getting the pre-assessment data.",
+            details: error.message
+        });
+    }
+}
+
+const getAIHelpForCareerChoice = async(req, res) => {
+    try {
+        const preassessment = await Preassessment.findOne({ user: req.user._id });
+        if (!preassessment) {
+            return res.status(404).json({ message: "Pre-assessment data not found." });
+        }
+        const careerChoices = await getCareerChoiceRecommendationFromAI(preassessment);
+        return res.status(200).json({
+            message: "AI career choices generated successfully.",
+            careerChoices: careerChoices
+        });
+    }catch (error) {
+        console.error("Error generating career path recommendation:", error);
+        return res.status(500).json({
+            error: "An error occurred while generating the career path recommendation.",
+            details: error.message,
+        });
+    }
+}
 
 const savePreAssessment = async (req, res) => {
     try {
@@ -83,35 +125,7 @@ const savePreAssessment = async (req, res) => {
 };
 
 
-const generateAIInsights = async (preassessment) => {
-    try {
-        const { user_profile, communication_skills, miscellanous } = preassessment;
 
-        //Will Do some AI stuff here
-
-        return {
-            summary: `Based on your education (${user_profile.education_level}), occupation (${user_profile.occupation}), 
-                      and interests (${user_profile.interested_field}), we see strong potential in achieving your goal of 
-                      "${user_profile.career_goal}".`,
-            strengths: [
-                ...(user_profile.skills_experience.filter(skill => skill.experience >= 3)
-                    .map(skill => `Proficient in ${skill.skill}`)),
-                communication_skills.verbal === "Advanced" && "Excellent verbal communication skills",
-                communication_skills.written === "Advanced" && "Excellent written communication skills"
-            ].filter(Boolean),
-            recommendations: [
-                "Consider advanced training in your interested field to align with your career goal.",
-                "Engage in team-based projects to further enhance collaboration skills.",
-                miscellanous.prefer_reading
-                    ? "Explore structured reading materials to maximize learning."
-                    : "Consider interactive or video-based resources for better engagement."
-            ]
-        };
-    } catch (error) {
-        console.error("Error generating AI insights:", error);
-        throw new Error("Failed to generate insights.");
-    }
-};
 
 
 const generatePreAssessmentReport = async (req, res) => {
@@ -156,10 +170,29 @@ const generatePreAssessmentReport = async (req, res) => {
     }
 };
 
+const getAIHelpForCareer = async(req, res) => {
+    try {
+        const preassessment = await Preassessment.findOne({ user: req.user._id });
+        if (!preassessment) {
+            return res.status(404).json({ message: "Pre-assessment data not found." });
+        }
+
+        const careerPathRecommendation = await getCareerPathRecommendationFromAI(preassessment);
+        return res.status(200).json({
+            message: "AI career path recommendation generated successfully.",
+            careerPathRecommendation: careerPathRecommendation
+        });
+    }catch (error) {
+        console.error("Error generating career path recommendation:", error);
+        return res.status(500).json({
+            error: "An error occurred while generating the career path recommendation.",
+            details: error.message,
+        });
+    }
+
+}
 
 
 
 
-
-
-module.exports = { savePreAssessment, generatePreAssessmentReport };
+module.exports = { savePreAssessment, generatePreAssessmentReport, getAIHelpForCareer, getAIHelpForCareerChoice, getUserPreAssessmentData };
