@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SidebarInset, SidebarProvider, SidebarTrigger, } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import AppSidebar from './AppSidebar';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useRecoilValue } from 'recoil';
+import { userState } from '@/store/auth';
 
 const questions = [
     {
@@ -31,6 +33,9 @@ const questions = [
 
 const DetailAssessment = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const user = useRecoilValue(userState);
+
+    console.log(user)
 
     const nextQuestion = () => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -49,6 +54,11 @@ const DetailAssessment = () => {
     };
 
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        document.title = `CAREERINSIGHT | ${user?.fullName?.toUpperCase()}'s ASSESSMENT`;
+    }, []);
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -106,9 +116,9 @@ const DetailAssessment = () => {
                             {questions[currentQuestionIndex].answers.map((answer, index) => (
                                 <div
                                     key={index}
-                                    className="w-full py-4 px-8 text-left text-lg font-medium border border-l-8 border-r-8 border-primary rounded-full shadow-sm"
+                                    className="w-full py-4 px-8 text-left text-[15px] font-medium border border-l-8 border-r-8 border-primary rounded-full shadow-sm"
                                 >
-                                    <span className='rounded-full px-3 py-1.5 items-center mr-1 border-primary border-2'>{String.fromCharCode(65 + index)}</span> {answer}
+                                    <span className='rounded-full px-2.5 py-1.5 items-center mr-1 border-primary border-2'>{String.fromCharCode(65 + index)}</span> {answer}
                                 </div>
                             ))}
                         </div>

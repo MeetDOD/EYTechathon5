@@ -5,11 +5,9 @@ import { userState } from "@/store/auth";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-label";
-import { Input } from "postcss";
 
 const Profile = () => {
     const user = useRecoilValue(userState);
-    console.log(user)
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -71,7 +69,7 @@ const Profile = () => {
 
                 <div className="mt-4 p-6 rounded-lg ">
                     <h3 className="text-2xl font-bold text-primary mb-6 text-center">Academic Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         <div className="flex items-center gap-4 border shadow-md p-4 rounded-lg transition duration-300 hover:-translate-y-2 hover:shadow-lg" style={{ borderColor: `var(--borderColor)` }}>
                             <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full">
@@ -90,16 +88,6 @@ const Profile = () => {
                             <div>
                                 <span className="text-sm font-semibold text-gray-500">University</span>
                                 <p className="text-lg font-bold">{user?.university}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 border shadow-md p-4 rounded-lg transition duration-300 hover:-translate-y-2 hover:shadow-lg" style={{ borderColor: `var(--borderColor)` }}>
-                            <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full">
-                                <FaCalendarAlt size={30} />
-                            </div>
-                            <div>
-                                <span className="text-sm font-semibold text-gray-500">Academic Year</span>
-                                <p className="text-lg font-bold">{user?.academicyear}</p>
                             </div>
                         </div>
 
