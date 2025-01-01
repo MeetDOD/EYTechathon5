@@ -140,7 +140,7 @@ const login = async (req, res) => {
 
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
-        const userDetailsIncomplete = !user.phoneno || !user.gender || !user.dateofbirth || !user.collegename || !user.university || !user.academicyear || !user.address || !user.techstack;
+        const userDetailsIncomplete = !user.hasGivenPreAssessment
 
         res.status(200).json({ message: "Login successful", token, user: { _id: user._id, email: user.email, fullName: user.fullName, photo: user.photo },userDetailsIncomplete });
 

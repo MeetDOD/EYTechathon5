@@ -61,6 +61,9 @@ const savePreAssessment = async (req, res) => {
             miscellanous
         });
 
+        doesUserExist.hasGivenPreAssessment = true;
+        await doesUserExist.save();
+
         console.log("Pre-assessment saved successfully:", newPreassessment._id);
 
 
