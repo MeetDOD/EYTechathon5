@@ -183,7 +183,7 @@ const Dashboard = () => {
                             </div>
                         ) : 'Generate your report'}
                     </Button>
-                    <div className="flex-1 bg-gradient-to-r from-green-400 via-blue-500 to-indigo-500 hover:from-green-500 hover:via-blue-600 hover:to-indigo-600 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                    <div className="flex-1 bg-gradient-to-r from-green-400 via-blue-500 to-violet-500 hover:from-green-500 hover:via-blue-600 hover:to-violet-600 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
                         <span className="text-lg font-semibold">Generate your learning path</span>
                     </div>
                 </div>
