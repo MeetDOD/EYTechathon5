@@ -10,6 +10,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     return (
@@ -30,6 +31,14 @@ const Dashboard = () => {
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 my-5">
+                    <Link to="/userreport" className="flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                        <span className="text-lg font-semibold">Generate your report</span>
+                    </Link>
+                    <div className="flex-1 bg-gradient-to-r from-green-400 via-blue-500 to-indigo-500 hover:from-green-500 hover:via-blue-600 hover:to-indigo-600 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                        <span className="text-lg font-semibold">Generate your learning path</span>
+                    </div>
                 </div>
                 <Profile />
             </SidebarInset>

@@ -32,6 +32,7 @@ import NotFound from './pages/NotFound';
 import CourseRecommendation from './Dashboard/CourseRecommendation';
 import AddDetailForm from './home/AddDetailForm';
 import DetailAssessment from './Dashboard/DetailAssessment';
+import UserReport from './pages/UserReport';
 
 const App = () => {
 
@@ -59,6 +60,11 @@ const App = () => {
             <Route path='/dashboard' element={
               <AuthenticatedRoute>
                 <Dashboard />
+              </AuthenticatedRoute>
+            } />
+            <Route path='/userreport' element={
+              <AuthenticatedRoute>
+                <UserReport />
               </AuthenticatedRoute>
             } />
             <Route path='/assessment' element={

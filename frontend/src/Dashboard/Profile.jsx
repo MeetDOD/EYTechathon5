@@ -15,7 +15,7 @@ const Profile = () => {
     }, []);
 
     return (
-        <div className="py-10 min-h-screen">
+        <div className="min-h-screen">
             <div className="container mx-auto max-w-5xl shadow-lg rounded-xl overflow-hidden border" style={{ borderColor: `var(--borderColor)` }}>
 
                 <div className="relative">
