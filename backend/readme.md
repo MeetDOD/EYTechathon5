@@ -227,8 +227,8 @@ This document provides a guide for all the API endpoints available in the Career
    - **Request Headers:** [Authorization: Bearer <token>](http://_vscodecontentref_/16)
 
 2. **Get Respective Learning Path**
-   - **Endpoint:** `GET /api/learningpath/:learningPathId`
-   - **Description:** Retrieves a specific learning path by its ID.
+   - **Endpoint:** `GET /api/learningpath/:skill_id`
+   - **Description:** Retrieves a specific learning path for a specific skill.
    - **Request Headers:** [Authorization: Bearer <token>](http://_vscodecontentref_/17)
 
 ## Assessment Routes
