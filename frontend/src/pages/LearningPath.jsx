@@ -36,6 +36,7 @@ const LearningPath = () => {
                 setName(response.data.preassessment.feedback.for_career_goal.name);
             } catch (error) {
                 console.log(error);
+                setLoading(true);
             } finally {
                 setLoading(false);
             }
@@ -76,7 +77,7 @@ const LearningPath = () => {
                                 {user?.fullName}'s Learning Path
                             </h1>
                             <p className="mt-2 text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl tracking-tight">
-                                {name || 'Loading...'}
+                                {name || 'Loading your context please wait...'}
                             </p>
                         </div>
                     </header>
