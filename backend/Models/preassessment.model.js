@@ -73,6 +73,28 @@ const preassessmentSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
+    },
+    feedback:{
+        
+        for_career_goal:{
+            name:{
+                type: String,
+                required: false
+            },
+            skills_to_focus:[
+                {
+                    skill:{
+                        type: String,
+                        required: false
+                    },
+                    why:{
+                        type: String,
+                        required: false
+                    }
+                }
+            ]
+        }
+        
     }
 }, {timestamps: true});
 
