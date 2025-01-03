@@ -38,15 +38,21 @@ const getRespectiveLearningPath = async (req, res) => {
         const learningP = await LearningPath.findOne({ user: req.user._id});
         if (!learningP) return res.status(404).json({ message: "Learning Path not found" });
 
-        const respectiveLearningPath = learningP.skills.filter(skill => skill._id == learningPathId);
-        if (!respectiveLearningPath) return res.status(404).json({ message: "Learning Path not found" });
-        
+        let data = {};
+        for(const x of learningP.skills){
+            if(x.preassesment_skill_id=== learningPathId){
+                data = x;
+            }
+        }
+
+        if (!data) return res.status(404).json({ message: "Learning Path not found" });
 
         res.status(200).json({
             message: "Learning Path found",
-            data: respectiveLearningPath
+            data: data
         });
 
+        
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: error.message });

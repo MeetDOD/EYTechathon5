@@ -16,6 +16,9 @@ const learningPathSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        preassesment_skill_id:{
+            type: String,
+        },
         chapters:[{
             title: {
                 type: String,
