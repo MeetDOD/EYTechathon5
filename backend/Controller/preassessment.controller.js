@@ -1,6 +1,7 @@
+const LearningPath = require('../Models/learningpath.model');
 const { Preassessment } = require('../Models/preassessment.model');
 const { User } = require('../Models/user.model');
-const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI} = require('./ai.controller');
+const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn, getRespectiveSkillLearningPathFromAI} = require('./ai.controller');
 require("dotenv").config();
 
 
@@ -192,7 +193,112 @@ const getAIHelpForCareer = async(req, res) => {
 
 }
 
+const skillsRecommendation = async (req, res) => {
+    try{
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const preassessment = await Preassessment.findOne({ user: req.user._id });
+        if (!preassessment) {
+            return res.status(404).json({ message: "Pre-assessment data not found." });
+        }
+        const skillsRecommendation = await getSkillsWhichUserShouldFocusOn(preassessment);
+        const allSkills = skillsRecommendation.crucialSkillsAndKnowledgeGaps.map(skill => {
+            return {
+                skill: skill.name,
+                why: skill.description
+            }
+        });
+
+        if(preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal){
+            preassessment.feedback.for_career_goal.name = preassessment.user_profile.career_goal;
+            preassessment.feedback.for_career_goal.skills_to_focus = allSkills;
+            await preassessment.save();
+        }   
+
+        
+
+        return res.status(200).json({
+            message: "Skills recommendation generated successfully.",
+            ultimateCareerGoal: `For your ultimate career goal of becoming a ${preassessment.user_profile.career_goal},`,
+            skillsRecommendation: skillsRecommendation
+        });
+    }catch (error) {
+        console.error("Error generating skills recommendation:", error);
+        return res.status(500).json({
+            error: "An error occurred while generating the skills recommendation.",
+            details: error.message,
+        });
+    }
+}
+
+const getRespectiveSkillLearningPath = async (req, res) => {
+    try {
+        // Find the user by ID
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Fetch the pre-assessment data for the user
+        const preassessment = await Preassessment.findOne({ user: req.user._id });
+        if (!preassessment) {
+            return res.status(404).json({ message: "Pre-assessment data not found." });
+        }
+
+        // Extract skills to focus on
+        const skillsToFocus = preassessment.feedback.for_career_goal.skills_to_focus.map(skill => skill.skill);
+
+        // Initialize the learning path array
+        const skillBasedLearningPath = [];
+
+        // Loop through each skill and fetch its respective learning path
+        for (const skill of skillsToFocus) {
+            try {
+                const skillLearningPath = await getRespectiveSkillLearningPathFromAI(
+                    skill,
+                    preassessment.user_profile.career_goal,
+                    preassessment
+                );
+
+                skillBasedLearningPath.push({
+                    name: skill,
+                    chapters: skillLearningPath.chapters,
+                    exercises: skillLearningPath.exercises,
+                    projects: skillLearningPath.projects,
+                    resources: skillLearningPath.resources,
+                });
+
+                console.log(`Learning path generated for skill: ${skill}`);
+            } catch (aiError) {
+                console.error(`Error fetching learning path for skill: ${skill}`, aiError.message);
+                // Optionally handle individual skill fetch errors
+            }
+        }
+
+        // Save the generated learning path in the database
+        const learningPath = await LearningPath.create({
+            career_goal: preassessment.user_profile.career_goal,
+            user: req.user._id,
+            skills: skillBasedLearningPath,
+        });
+
+        console.log("Learning path saved successfully:", learningPath._id);
+        // Respond with the generated learning path
+        return res.status(200).json({
+            message: "Skill based learning path generated and saved successfully.",
+            skillBasedLearningPath,
+        });
+
+    } catch (error) {
+        console.error("Error generating skills recommendation:", error);
+        return res.status(500).json({
+            error: "An error occurred while generating the skills recommendation.",
+            details: error.message,
+        });
+    }
+};
 
 
-
-module.exports = { savePreAssessment, generatePreAssessmentReport, getAIHelpForCareer, getAIHelpForCareerChoice, getUserPreAssessmentData };
+module.exports = { savePreAssessment, skillsRecommendation, generatePreAssessmentReport, getAIHelpForCareer, getAIHelpForCareerChoice, getUserPreAssessmentData, getRespectiveSkillLearningPath };
