@@ -39,7 +39,7 @@ const Dashboard = () => {
         getPreassessment();
     }, []);
 
-    const handleSubmit = async () => {
+    const handleReportSubmit = async () => {
         setLoading(true);
 
         if (!getpreassessment) {
@@ -176,16 +176,20 @@ const Dashboard = () => {
                     </Breadcrumb>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 my-5">
-                    <Button disabled={loading} onClick={handleSubmit} size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                    <Button disabled={loading} onClick={handleReportSubmit} size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
                         {loading ? (
                             <div className='flex flex-row gap-2 items-center animate-pulse'>
                                 <ImSpinner2 className='animate-spin' /> Generating your report...
                             </div>
                         ) : 'Generate your report'}
                     </Button>
-                    <div className="flex-1 bg-gradient-to-r from-green-400 via-blue-500 to-violet-500 hover:from-green-500 hover:via-blue-600 hover:to-violet-600 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
-                        <span className="text-lg font-semibold">Generate your learning path</span>
-                    </div>
+                    <Button size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                        {loading ? (
+                            <div className='flex flex-row gap-2 items-center animate-pulse'>
+                                <ImSpinner2 className='animate-spin' /> Generating your learning path...
+                            </div>
+                        ) : 'Generate your learning path'}
+                    </Button>
                 </div>
                 <Profile />
             </SidebarInset>
