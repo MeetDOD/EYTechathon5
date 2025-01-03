@@ -10,6 +10,9 @@ const assessmentSchema = new mongoose.Schema({
             skill: {
                 type: String,
             },
+            preassessment_skill_id:{
+                type: String,
+            },
             status: {
                 type: String,
                 enum: ['Not Started', 'In Progress', 'Completed'],

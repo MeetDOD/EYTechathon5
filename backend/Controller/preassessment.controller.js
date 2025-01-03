@@ -1,7 +1,7 @@
 const LearningPath = require('../Models/learningpath.model');
 const { Preassessment } = require('../Models/preassessment.model');
 const { User } = require('../Models/user.model');
-const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn, getRespectiveSkillLearningPathFromAI} = require('./ai.controller');
+const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn, getRespectiveSkillLearningPathFromAI } = require('./ai.controller');
 require("dotenv").config();
 
 
@@ -40,12 +40,35 @@ const getUserPreAssessmentData = async (req, res) => {
         const preassessment = await Preassessment.findOne({ user: req.user._id });
         if (!preassessment) {
             return res.status(404).json
-            ({ message: "Pre-assessment data not found." });
+                ({ message: "Pre-assessment data not found." });
         }
-        return res.status(200).json({
-            message: "Pre-assessment data retrieved successfully.",
-            preassessment: preassessment
-        });
+        let flag = false;
+        if (preassessment.feedback.for_career_goal.skills_to_focus.length === 0) {
+            const skillsRecommendation = await getSkillsWhichUserShouldFocusOn(preassessment);
+            const allSkills = skillsRecommendation.crucialSkillsAndKnowledgeGaps.map(skill => {
+                return {
+                    skill: skill.name,
+                    why: skill.description
+                }
+            });
+
+            if (preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal) {
+                preassessment.feedback.for_career_goal.name = preassessment.user_profile.career_goal;
+                preassessment.feedback.for_career_goal.skills_to_focus = allSkills;
+                await preassessment.save();
+            }
+        }
+        if(flag){
+            return res.status(200).json({
+                message: "Generated pre-assessment data successfully.",
+                preassessment: preassessment
+            });
+        }else{
+            return res.status(200).json({
+                message: "Fetched pre-assessment data successfully.",
+                preassessment: preassessment
+            });
+        }
     } catch (error) {
         console.error("Error getting user pre-assessment data:", error);
         return res.status(500).json({
@@ -55,7 +78,7 @@ const getUserPreAssessmentData = async (req, res) => {
     }
 }
 
-const getAIHelpForCareerChoice = async(req, res) => {
+const getAIHelpForCareerChoice = async (req, res) => {
     try {
         const preassessment = await Preassessment.findOne({ user: req.user._id });
         if (!preassessment) {
@@ -66,7 +89,7 @@ const getAIHelpForCareerChoice = async(req, res) => {
             message: "AI career choices generated successfully.",
             careerChoices: careerChoices
         });
-    }catch (error) {
+    } catch (error) {
         console.error("Error generating career path recommendation:", error);
         return res.status(500).json({
             error: "An error occurred while generating the career path recommendation.",
@@ -171,7 +194,7 @@ const generatePreAssessmentReport = async (req, res) => {
     }
 };
 
-const getAIHelpForCareer = async(req, res) => {
+const getAIHelpForCareer = async (req, res) => {
     try {
         const preassessment = await Preassessment.findOne({ user: req.user._id });
         if (!preassessment) {
@@ -183,7 +206,7 @@ const getAIHelpForCareer = async(req, res) => {
             message: "AI career path recommendation generated successfully.",
             careerPathRecommendation: careerPathRecommendation
         });
-    }catch (error) {
+    } catch (error) {
         console.error("Error generating career path recommendation:", error);
         return res.status(500).json({
             error: "An error occurred while generating the career path recommendation.",
@@ -194,7 +217,7 @@ const getAIHelpForCareer = async(req, res) => {
 }
 
 const skillsRecommendation = async (req, res) => {
-    try{
+    try {
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).json({ message: "User not found." });
@@ -211,20 +234,20 @@ const skillsRecommendation = async (req, res) => {
             }
         });
 
-        if(preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal){
+        if (preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal) {
             preassessment.feedback.for_career_goal.name = preassessment.user_profile.career_goal;
             preassessment.feedback.for_career_goal.skills_to_focus = allSkills;
             await preassessment.save();
-        }   
+        }
 
-        
+
 
         return res.status(200).json({
             message: "Skills recommendation generated successfully.",
             ultimateCareerGoal: `For your ultimate career goal of becoming a ${preassessment.user_profile.career_goal},`,
             skillsRecommendation: skillsRecommendation
         });
-    }catch (error) {
+    } catch (error) {
         console.error("Error generating skills recommendation:", error);
         return res.status(500).json({
             error: "An error occurred while generating the skills recommendation.",
@@ -248,7 +271,12 @@ const getRespectiveSkillLearningPath = async (req, res) => {
         }
 
         // Extract skills to focus on
-        const skillsToFocus = preassessment.feedback.for_career_goal.skills_to_focus.map(skill => skill.skill);
+        const skillsToFocus = preassessment.feedback.for_career_goal.skills_to_focus.map((skill) => {
+            return {
+                skill: skill.skill,
+                _id: skill._id
+            }
+        });
 
         // Initialize the learning path array
         const skillBasedLearningPath = [];
@@ -257,31 +285,35 @@ const getRespectiveSkillLearningPath = async (req, res) => {
         for (const skill of skillsToFocus) {
             try {
                 const skillLearningPath = await getRespectiveSkillLearningPathFromAI(
-                    skill,
+                    skill.skill,
                     preassessment.user_profile.career_goal,
                     preassessment
                 );
 
                 skillBasedLearningPath.push({
-                    name: skill,
+                    name: skill.skill,
                     chapters: skillLearningPath.chapters,
                     exercises: skillLearningPath.exercises,
                     projects: skillLearningPath.projects,
                     resources: skillLearningPath.resources,
+                    preassesment_skill_id: skill._id.toString()
                 });
 
-                console.log(`Learning path generated for skill: ${skill}`);
+                console.log(`Learning path generated for skill: ${skill.skill}`);
             } catch (aiError) {
-                console.error(`Error fetching learning path for skill: ${skill}`, aiError.message);
+                console.error(`Error fetching learning path for skill: ${skill.skill}`, aiError.message);
                 // Optionally handle individual skill fetch errors
             }
         }
+
+        console.log("First item in skillBasedLearningPath:", skillBasedLearningPath[0]);
 
         // Save the generated learning path in the database
         const learningPath = await LearningPath.create({
             career_goal: preassessment.user_profile.career_goal,
             user: req.user._id,
             skills: skillBasedLearningPath,
+
         });
 
         console.log("Learning path saved successfully:", learningPath._id);

@@ -4,7 +4,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaHome } from 'react-icons/fa';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 const SkeletonLoader = () => (
@@ -32,6 +32,7 @@ const LearningPath = () => {
                         },
                     }
                 );
+
                 setFeedback(response.data.preassessment.feedback.for_career_goal.skills_to_focus || []);
                 setName(response.data.preassessment.feedback.for_career_goal.name);
             } catch (error) {
@@ -92,6 +93,7 @@ const LearningPath = () => {
                                         key={index}
                                         className="bg-violet-100 border-l-4 border-primary p-4 rounded-xl shadow-md hover:shadow-xl transition duration-300 hover:-translate-y-2"
                                     >
+                                        <Link to={skill._id} className='text-black cursor-pointer'>{skill._id}</Link>
                                         <h3 className="text-[19px] font-extrabold text-primary">{skill.skill}</h3>
                                         <p className="text-[15px] text-primary font-medium mt-2">{skill.why}</p>
                                     </div>
