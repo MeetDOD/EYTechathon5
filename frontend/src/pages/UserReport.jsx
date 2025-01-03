@@ -15,7 +15,7 @@ const UserReport = () => {
 
     useEffect(() => {
         if (user) {
-            // window.scrollTo(0, 0);
+            window.scrollTo(0, 0);
             document.title = `CAREERINSIGHT | ${user?.fullName?.toUpperCase()}'s AI REPORT`;
         }
     }, [user]);
@@ -77,9 +77,7 @@ const UserReport = () => {
                             Tailored insights and recommendations for your career growth
                         </p>
                     </div>
-
                 </header>
-
                 <main className="container mx-auto px-4 py-8">
                     <section className="mb-10">
                         <h2 className="text-3xl font-semibold flex items-center gap-2">

@@ -33,6 +33,7 @@ import CourseRecommendation from './Dashboard/CourseRecommendation';
 import AddDetailForm from './home/AddDetailForm';
 import DetailAssessment from './Dashboard/DetailAssessment';
 import UserReport from './pages/UserReport';
+import LearningPath from './pages/LearningPath';
 
 const App = () => {
 
@@ -65,6 +66,11 @@ const App = () => {
             <Route path='/userreport' element={
               <AuthenticatedRoute>
                 <UserReport />
+              </AuthenticatedRoute>
+            } />
+            <Route path='/learningpath' element={
+              <AuthenticatedRoute>
+                <LearningPath />
               </AuthenticatedRoute>
             } />
             <Route path='/assessment' element={

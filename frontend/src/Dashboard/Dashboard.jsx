@@ -183,12 +183,8 @@ const Dashboard = () => {
                             </div>
                         ) : 'Generate your report'}
                     </Button>
-                    <Button size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
-                        {loading ? (
-                            <div className='flex flex-row gap-2 items-center animate-pulse'>
-                                <ImSpinner2 className='animate-spin' /> Generating your learning path...
-                            </div>
-                        ) : 'Generate your learning path'}
+                    <Button onClick={() => navigate("/learningpath")} size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                        Generate your learning path
                     </Button>
                 </div>
                 <Profile />
