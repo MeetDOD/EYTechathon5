@@ -77,7 +77,7 @@ const LearningPath = () => {
                             <h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold flex items-center justify-center gap-2">
                                 {user?.fullName}'s Learning Path
                             </h1>
-                            <p className="mt-2 text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl tracking-tight">
+                            <p className="mt-2 text-base font-medium sm:text-lg md:text-xl lg:text-xl xl:text-2xl tracking-tight">
                                 {name || 'Loading your context please wait...'}
                             </p>
                         </div>
@@ -91,11 +91,10 @@ const LearningPath = () => {
                                 : feedback.map((skill, index) => (
                                     <div
                                         key={index}
-                                        className="bg-violet-100 border-l-4 border-primary p-4 rounded-xl shadow-md hover:shadow-xl transition duration-300 hover:-translate-y-2"
+                                        className="bg-violet-100 border-l-4 border-primary px-6 py-4 text-justify rounded-xl shadow-md hover:shadow-xl cursor-pointer transition duration-300 hover:-translate-y-2"
                                     >
-                                        <Link to={skill._id} className='text-black cursor-pointer'>{skill._id}</Link>
-                                        <h3 className="text-[19px] font-extrabold text-primary">{skill.skill}</h3>
-                                        <p className="text-[15px] text-primary font-medium mt-2">{skill.why}</p>
+                                        <h3 className="text-[19px] font-bold text-primary">{skill.skill}</h3>
+                                        <p className="text-[15px] text-primary/80 font-medium mt-2">{skill.why}</p>
                                     </div>
                                 ))}
                         </div>

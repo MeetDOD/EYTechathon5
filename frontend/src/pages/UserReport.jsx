@@ -73,7 +73,7 @@ const UserReport = () => {
                         <h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold flex items-center justify-center gap-2">
                             {user?.fullName}'s AI Report
                         </h1>
-                        <p className="mt-2 text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl tracking-tight">
+                        <p className="mt-2 font-medium text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl tracking-tight">
                             Tailored insights and recommendations for your career growth
                         </p>
                     </div>
