@@ -72,7 +72,10 @@ const LearningPath = () => {
             </div>
             <div className="border shadow-lg rounded-xl min-h-screen pb-8" style={{ borderColor: `var(--borderColor)` }}>
                 <div>
-                    <header className="mb-8 bg-gradient-to-r from-violet-500 via-purple-700 to-indigo-900 text-white py-14 rounded-t-xl">
+                    <header className="mb-8 bg-gradient-to-r from-violet-500 via-purple-700 to-indigo-900 text-white py-14 rounded-t-xl h-52 bg-cover bg-center"
+                        style={{
+                            backgroundImage: `url('https://static.canva.com/web/images/e733916c4616f5baa19098cc2844369b.jpg')`,
+                        }}>
                         <div className="container mx-auto px-4 text-center">
                             <h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold flex items-center justify-center gap-2">
                                 {user?.fullName}'s Learning Path
