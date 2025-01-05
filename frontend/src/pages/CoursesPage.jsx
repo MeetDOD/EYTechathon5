@@ -47,12 +47,15 @@ const CoursesPage = () => {
     return (
         <div>
             <div className='flex flex-col items-center gap-2 my-10 px-4'>
-                <h1 className='text-2xl md:text-3xl font-bold text-center'>
-                    Latest <span className='text-primary'>Courses</span>
-                </h1>
-                <p className='text-center text-lg opacity-90 tracking-tight'>
-                    Explore our newest courses designed to help you gain essential skills and advance your career.
-                </p>
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-extrabold sm:text-4xl">
+                        Latest <span className='text-primary'>Courses</span>
+                    </h2>
+                    <p className="mt-4 text-lg font-medium text-gray-500">
+                        Explore our newest courses designed to help you gain essential skills and advance your career
+
+                    </p>
+                </div>
             </div>
             {loading ?
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

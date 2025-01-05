@@ -16,11 +16,11 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen">
-            <div className="container mx-auto max-w-5xl shadow-lg rounded-xl overflow-hidden border" style={{ borderColor: `var(--borderColor)` }}>
+            <div className="container mx-auto shadow-lg rounded-xl overflow-hidden border" style={{ borderColor: `var(--borderColor)` }}>
 
                 <div className="relative">
                     <div
-                        className="h-48 bg-cover bg-center"
+                        className="h-52 bg-cover bg-center"
                         style={{
                             backgroundImage: `url('https://static.canva.com/web/images/e733916c4616f5baa19098cc2844369b.jpg')`,
                         }}

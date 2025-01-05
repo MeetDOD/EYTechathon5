@@ -67,9 +67,7 @@ const AppSidebar = () => {
     const handleLogout = () => {
         localStorage.removeItem("token");
         setTokenState("");
-
         toast.success("Logged out successfully");
-
         navigate("/")
     };
 
@@ -77,7 +75,7 @@ const AppSidebar = () => {
         <Sidebar className="w-64 min-h-screen shadow-md" style={{ color: `var(--text-color)`, borderColor: `var(--borderColor)` }}>
             <SidebarHeader className="px-4" style={{ backgroundColor: `var(--background-color)` }} >
                 <div className="flex items-center gap-3 justify-center my-1">
-                    <img src={logo} alt="Logo" className="w-36 object-contain" />
+                    <img src={logo} onClick={() => navigate("/")} alt="Logo" className="w-36 cursor-pointer object-contain" />
                 </div>
             </SidebarHeader>
 
