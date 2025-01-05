@@ -2,6 +2,7 @@ import { useTheme } from '@/components/ui/themeprovider'
 import FAQ from '@/home/FAQ'
 import Features from '@/home/Features'
 import Hero from '@/home/Hero'
+import WebDetails from '@/home/WebDetails'
 import React, { useEffect } from 'react'
 
 const Home = () => {
@@ -22,6 +23,7 @@ const Home = () => {
 
             <Hero />
             <Features />
+            <WebDetails />
             <FAQ />
         </div>
     )
