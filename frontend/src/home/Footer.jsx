@@ -55,11 +55,12 @@ const Footer = () => {
                     <h2 className="font-bold text-primary text-3xl mb-4">About Career Insight</h2>
                     <p className="font-semibold">
                         <span className="text-3xl">👋</span> <span className="font-bold text-xl tracking-tight text-primary">Career Insight</span> is dedicated to helping students build professional portfolios, gain career insights, and connect with industry experts. Start your journey towards career success today!
-                    </p></div>
+                    </p>
+                </div>
             </div>
 
             <div className="text-center text-sm font-semibold mt-7 pt-4 mb-2.5">
-                Made with <span className='text-xl'>💓</span> by careerinsight, Copyright © 2024 All rights reserved by <span className='text-primary font-bold'>Meet, Ramesh & Kashish</span>
+                Made with <span className='text-xl'>💓</span> by careerinsight, Copyright © 2025 All rights reserved by <span className='text-primary font-bold'>Meet, Rehman & Mittrav</span>
             </div>
         </footer>
     );

@@ -104,13 +104,13 @@ const ContactUs = () => {
                                 <div className="flex items-center mb-6">
                                     <MdOutlineEmail className="text-gray-800" size={30} />
                                     <h5 className="text-gray-800 text-base font-semibold ml-5">
-                                        techcare@gmail.com
+                                        novag388@gmail.com
                                     </h5>
                                 </div>
                                 <a href="javascript:;" className="flex items-center mb-6">
                                     <FaGithub className="text-gray-800" size={30} />
-                                    <h5 className="text-gray-800 text-base font-semibold ml-5">
-                                        @MeetDOD @RAM909 @kashish567
+                                    <h5 className="text-gray-800 text-sm font-semibold ml-5">
+                                        @MeetDOD @Slacky300 @Maskifer001
                                     </h5>
                                 </a>
                                 <div className="flex items-center justify-center border-t border-gray-100 pt-6 gap-7">
