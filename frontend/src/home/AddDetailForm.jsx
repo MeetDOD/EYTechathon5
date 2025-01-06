@@ -49,7 +49,7 @@ const AddDetailForm = () => {
         if (user && !user?.hasGivenPreAssessment) {
             setShowAddDetailsDialog(true);
         } else {
-            navigate('/dashboard');
+            navigate('/');
         }
     }, [user]);
 
