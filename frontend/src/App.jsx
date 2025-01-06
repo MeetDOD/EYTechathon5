@@ -38,9 +38,7 @@ import LearningPath from './pages/LearningPath';
 const App = () => {
 
   return (
-    <Suspense
-      fallback={<Loader />}
-    >
+    <Suspense fallback={<Loader />}>
       <BrowserRouter>
         <div className="mx-4 sm:mx-[10%]">
           <Navbar />

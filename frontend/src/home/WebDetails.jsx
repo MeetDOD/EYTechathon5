@@ -6,7 +6,7 @@ import { FaCheckCircle } from "react-icons/fa";
 const WebDetails = () => {
     return (
         <div
-            className="bg-primary p-6 md:p-10 py-12 md:py-16 rounded-2xl mt-10 shadow-xl bg-cover bg-center"
+            className="bg-primary p-6 md:p-10 py-12 md:py-16 rounded-2xl mt-14 shadow-xl bg-cover bg-center"
             style={{
                 backgroundImage: `url('https://static.canva.com/web/images/e733916c4616f5baa19098cc2844369b.jpg')`,
             }}
