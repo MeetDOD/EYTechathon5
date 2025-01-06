@@ -183,7 +183,7 @@ const Dashboard = () => {
                             </div>
                         ) : 'Generate your report'}
                     </Button>
-                    <Button onClick={() => navigate("/learningpath")} size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-teal-400 via-cyan-500 to-purple-600 hover:from-teal-500 hover:via-cyan-600 hover:to-purple-700 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
+                    <Button onClick={() => navigate("/learningpath")} size="xl" className="text-lg font-semibold flex-1 bg-gradient-to-r from-purple-600 via-cyan-500 to-teal-400 hover:from-purple-700 hover:via-cyan-600 hover:to-teal-500 text-white rounded-xl p-4 shadow-md text-center cursor-pointer">
                         Generate your learning path
                     </Button>
                 </div>

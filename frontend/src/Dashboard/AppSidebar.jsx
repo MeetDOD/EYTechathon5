@@ -20,11 +20,11 @@ const data = {
             url: '/dashboard',
             icon: MdSpaceDashboard,
         },
-        {
-            title: 'AI Assessment',
-            url: '/assessment',
-            icon: MdAssessment,
-        },
+        // {
+        //     title: 'AI Assessment',
+        //     url: '/assessment',
+        //     icon: MdAssessment,
+        // },
         {
             title: 'Resume Builder',
             url: '/resumebuilder',
@@ -45,11 +45,11 @@ const data = {
             url: '/mycourses',
             icon: MdLibraryBooks,
         },
-        {
-            title: 'Create Course',
-            url: '/createcourse',
-            icon: FaLaptop,
-        },
+        // {
+        //     title: 'Create Course',
+        //     url: '/createcourse',
+        //     icon: FaLaptop,
+        // },
         {
             title: 'Recommendation',
             url: '/courserecommendation',
