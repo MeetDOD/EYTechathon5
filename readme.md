@@ -77,7 +77,7 @@ These features empower students to align their learning with current job market 
 ## **💻 Tech Stack**
 
 - **Frontend**: React.js,Html, CSS, Tailwind CSS, Shadcn UI
-- **Backend**: Node.js, Express.js, Javascript, jsonwebtoken
+- **Backend**: Node.js, Express.js, JWT, N8N, Socket.io
 - **Database**: MongoDB, Redis
 - **AI Tools**: Gemini API, GenAI
 - **Deployment**: Microsoft Azure, Docker, Render
