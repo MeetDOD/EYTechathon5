@@ -10,6 +10,8 @@ const resumeRoutes = require('./Routes/userresume.route');
 const preassessmentRoutes = require('./Routes/preassessment.route');
 const learningpathRoutes = require('./Routes/learningpath.route');
 const assessmentRoutes = require('./Routes/assessment.route');
+const workflowRoutes = require('./Routes/workflow.route');
+
 const fileUpload = require('express-fileupload');
 // const googlemeetroute = require('./Routes/googlemeetauth.route');
 const { cloudnairyconnect } = require("./Config/cloudinary");
@@ -37,6 +39,7 @@ app.use("/api/userresume", resumeRoutes);
 app.use("/api/preassessment", preassessmentRoutes);
 app.use("/api/learningpath", learningpathRoutes);
 app.use("/api/assessment", assessmentRoutes);
+app.use("/api/workflow", workflowRoutes);
 
 const startServer = async () => {
     await connectToDB();

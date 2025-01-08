@@ -53,6 +53,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "student"
     },
+    contentGenerated: {
+        type: Boolean,
+        default: false
+    },
     enrolledCourses: [
         {
             course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
