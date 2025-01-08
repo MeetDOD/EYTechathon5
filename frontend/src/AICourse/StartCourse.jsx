@@ -13,8 +13,9 @@ import Confetti from 'react-confetti';
 const StartCourse = () => {
 
     const { id } = useParams();
-    const [course, setCourse] = useState(null);
+    const [contents, setContents] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [courseName, setCourseName] = useState("");
     const [activeChapterIndex, setActiveChapterIndex] = useState(0);
     const [showConfetti, setShowConfetti] = useState(false);
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -37,11 +38,17 @@ const StartCourse = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/getcourse/${id}`);
-                setCourse(response.data.course);
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/course-contents/${id}`,{
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                    }
+                });
+                setContents(response.data.data);
+                setCourseName(response.data.forCourseName);
 
                 const savedIndex = parseInt(localStorage.getItem(`progress_${id}`), 10);
-                if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < response.data.course.chapters.length) {
+                if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < response.data.data.length) {
                     setActiveChapterIndex(savedIndex);
                 }
             } catch (error) {
@@ -55,7 +62,7 @@ const StartCourse = () => {
     }, [id]);
 
     const handleNavigation = (newIndex) => {
-        if (newIndex >= 0 && newIndex < course.chapters.length) {
+        if (newIndex >= 0 && newIndex < contents.length) {
             setActiveChapterIndex(newIndex);
             localStorage.setItem(`progress_${id}`, newIndex);
             window.scrollTo(0, 0);
@@ -64,7 +71,7 @@ const StartCourse = () => {
 
     const handleFinish = async () => {
         try {
-            const totalChapters = course.chapters.length;
+            const totalChapters = contents.length;
             await axios.put(
                 `${import.meta.env.VITE_BASE_URL}/api/usercourse/updateprogress`,
                 {
@@ -94,7 +101,7 @@ const StartCourse = () => {
 
     const updateUserProgress = async () => {
         try {
-            const totalChapters = course.chapters.length;
+            const totalChapters = contents.length;
             const progress = Math.round(((activeChapterIndex + 1) / totalChapters) * 100);
             await axios.put(
                 `${import.meta.env.VITE_BASE_URL}/api/usercourse/updateprogress`,
@@ -122,11 +129,11 @@ const StartCourse = () => {
         );
     }
 
-    if (!course) {
+    if (!contents) {
         return <p className="text-center text-xl mt-10">Course not found.</p>;
     }
 
-    const activeChapter = course.chapters[activeChapterIndex];
+    const activeChapter = contents?.[activeChapterIndex] || contents[0];
 
     return (
         <div>
@@ -139,9 +146,9 @@ const StartCourse = () => {
             </div>
             <div className="flex flex-col lg:flex-row min-h-screen" style={{ borderColor: `var(--borderColor)` }}>
                 <div className="shadow-md border rounded-xl border-gray-300 lg:w-1/4 p-4 h-screen lg:sticky top-0 overflow-y-auto" style={{ borderColor: `var(--borderColor)` }}>
-                    <h2 className="text-lg font-bold mb-4 border-b pb-4" style={{ borderColor: `var(--borderColor)` }}>{course?.courseName}</h2>
+                    <h2 className="text-lg font-bold mb-4 border-b pb-4" style={{ borderColor: `var(--borderColor)` }}>{courseName}</h2>
                     <ul className="space-y-2">
-                        {course?.chapters.map((chapter, index) => (
+                        {contents?.map((content, index) => (
                             <li
                                 key={index}
                                 className={`px-3 py-2 rounded-lg ${activeChapterIndex === index
@@ -153,8 +160,8 @@ const StartCourse = () => {
                                         <h2 className='p-1 bg-primary text-white rounded-full w-8 h-8 text-center'>{index + 1}</h2>
                                     </div>
                                     <div className='col-span-4'>
-                                        <h2 className='font-medium'>{`${chapter?.title}`}</h2>
-                                        <h2 className="text-sm font-semibold flex gap-2 items-center text-primary py-1"><FaClock />{chapter?.duration}</h2>
+                                        <h2 className='font-medium'>{`${content?.title}`}</h2>
+                                        <h2 className="text-sm font-semibold flex gap-2 items-center text-primary py-1"><FaClock />{content?.duration}</h2>
                                     </div>
                                 </div>
                             </li>
@@ -212,7 +219,7 @@ const StartCourse = () => {
                                 <Button
                                     size="sm"
                                     onClick={() => {
-                                        if (activeChapterIndex === course.chapters.length - 1) {
+                                        if (activeChapterIndex === contents.length - 1) {
                                             handleFinish();
                                         } else {
                                             handleNavigation(activeChapterIndex + 1);
@@ -221,7 +228,7 @@ const StartCourse = () => {
                                     }}
                                     className="flex gap-2 px-5"
                                 >
-                                    {activeChapterIndex === course.chapters.length - 1
+                                    {activeChapterIndex === contents.length - 1
                                         ? <span className='flex gap-2'>Finish <GiPartyPopper size={20} /></span>
                                         : <span className='flex gap-2 items-center'>Next<IoMdArrowRoundForward size={20} /></span>
                                     }

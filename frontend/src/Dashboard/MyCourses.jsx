@@ -21,14 +21,15 @@ const MyCourses = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/mycourses`,
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/all-courses`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem('token')}`,
                         },
                     }
                 );
-                setCourse(response.data.enrolledCourses);
+                console.log(response.data.data);
+                setCourse(response.data.data);
             } catch (error) {
                 toast.error("Failed to load courses.");
             } finally {
@@ -119,27 +120,27 @@ const MyCourses = () => {
                     <div className="grid grid-cols-1 mt-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paginatedCourses?.map((course) => (
                             <div
-                                key={course.id}
+                                key={course._id}
                                 className="p-2 shadow-md rounded-lg overflow-hidden border transition duration-300 hover:-translate-y-2"
                                 style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)` }}
                             >
                                 <img
-                                    src={course.course.thumbnail}
-                                    alt={course.course.courseName}
+                                src={course.thumbnail || "https://preview.redd.it/vkg7a1nlxvl61.png?auto=webp&s=924f9cce333b1f436e056bd6ee0b73da5a907bb7"}
+                                alt={course.courseName}
                                     className="w-full rounded-lg  h-40 object-cover"
                                 />
 
                                 <div className="py-4 space-y-2">
-                                    <div className="text-lg font-bold line-clamp-1">
-                                        CareerInsight: {course.course.courseName}
+                                    <div className="text-sm font-bold">
+                                        {course.courseName}
                                     </div>
                                     <div className='flex justify-between'>
                                         <div className='text-[10px] p-1 bg-blue-100 rounded-full px-2 text-primary'>
-                                            {course.course.category}
+                                            {course.category}
                                         </div>
                                         <div className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
                                             <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                            {course.course.duration}
+                                            {course.duration}
                                         </div>
                                     </div>
 
@@ -147,21 +148,21 @@ const MyCourses = () => {
                                         <div className="w-full bg-gray-100 rounded-full h-2">
                                             <div
                                                 className="bg-primary h-2 rounded-full"
-                                                style={{ width: `${course.progress}%` }}
+                                                style={{ width: `${course?.progress}%` }}
                                             ></div>
                                         </div>
                                         <p className="text-xs mt-1 font-semibold tracking-tight">
-                                            My Progress {course.progress}%
+                                            My Progress {course?.progress}%
                                         </p>
                                     </div>
 
-                                    <div className="text-xs font-semibold text-gray-500">
-                                        Enrolled At: {format(new Date(course.enrolledAt), 'MMMM d, yyyy, h:mm a')}
-                                    </div>
+                                    {/* <div className="text-xs font-semibold text-gray-500">
+                                        Enrolled At: {format(new Date(course.created_at), 'MMMM d, yyyy, h:mm a')}
+                                    </div> */}
                                 </div>
 
                                 <div>
-                                    <Link to={`/startcourse/${course.course._id}`}>
+                                    <Link to={`/startcourse/${course._id}`}>
                                         <Button className="w-full">View Course</Button>
                                     </Link>
                                 </div>

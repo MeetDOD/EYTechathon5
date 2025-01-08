@@ -219,7 +219,7 @@ const getRespectiveSkillLearningPathFromAI = async (skill, career_goal, preasses
     }
 }
 
-const generateRespectiveSkillAssessmentFromAI = async (skill_name,exercises) => {
+const generateRespectiveSkillAssessmentFromAI = async (skill_name, exercises) => {
     try {
         const prompt = `
             You are an AI assistant tasked with generating skill assessments. Create an assessment for the skill "${skill_name}" using the following exercises as a guide. Each exercise contains a title and description that highlight key topics and activities.
@@ -270,5 +270,60 @@ const generateRespectiveSkillAssessmentFromAI = async (skill_name,exercises) => 
 };
 
 
+const generateCourseContentFromAI = async (chapters, preassessmentData, skill_name) => {
+    try {
+        const prompt = `
+                Based on the user's career goal and preassessment data, generate a course for the skill: **${skill_name}**  with the following details:
 
-module.exports = { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn }
+            ### User Profile:
+            - **Education Level**: ${preassessmentData.user_profile.education_level}
+            - **Occupation**: ${preassessmentData.user_profile.occupation}
+            - **Interested Field**: ${preassessmentData.user_profile.interested_field}
+            - **Career Goal**: ${preassessmentData.user_profile.career_goal}
+            - **Skills and Experience**: ${JSON.stringify(preassessmentData.user_profile.skills_experience)}
+            - **Communication Skills**: Verbal (${preassessmentData.communication_skills.verbal}), Written (${preassessmentData.communication_skills.written})
+            - **Preferences**: 
+            - Collaborative Learning: ${preassessmentData.miscellanous.prefer_collaborative_learning}
+            - Reading: ${preassessmentData.miscellanous.prefer_reading}
+            - Weekly Time Commitment: ${preassessmentData.miscellanous.time_commitment} hours
+
+            ### Chapters:
+            The course should contain the following chapters:
+            ${chapters.map((chapter, index) => `- Chapter ${index + 1}: **${chapter.title}** - ${chapter.description}`).join('\n')}
+
+            ### JSON Response Structure:
+            The response must follow this structure:
+            \`\`\`json
+            {
+                        "courseName": "Course Title Here",
+                        "description": "Detailed course description here.",
+                        "category": "Category name here.",
+                        "courseLevel": "Difficulty level here.",
+                        "language": "Language here.",
+                        "topic": "Specific topic here.",
+                        "for_skill": "Skill name here.",
+                        "content": [
+                            {
+                                "title": "Chapter 1 Title",
+                                "description": "Chapter 1 Content",
+                                "content": "Chapter 1 Content",
+                                "duration": "Chapter 1 Duration",
+                            }
+                        ]
+            }
+            \`\`\`
+        `;
+
+        const result = await chatSession.sendMessage(prompt);
+        const data = result.response.text();
+        const cleanedData = data.replace(/```json|```/g, '');
+        return JSON.parse(cleanedData);
+
+    } catch (error) {
+        console.error("Error generating course and course content:", error);
+        throw new Error("Failed to generate course and course content.");
+    }
+}
+
+
+module.exports = { generateCourseContentFromAI, generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn }
