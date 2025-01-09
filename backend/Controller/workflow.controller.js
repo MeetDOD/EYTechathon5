@@ -1,18 +1,52 @@
+const Assessment = require("../Models/assessment.model");
 const LearningPath = require("../Models/learningpath.model");
 const { Preassessment } = require("../Models/preassessment.model");
 const { User } = require("../Models/user.model");
 const { Course, Content } = require("../Models/usercourse.model");
 const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
-const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI } = require("./ai.controller");
-const { generateLearningPathContent } = require("./learningpath.controller");
+const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn } = require("./ai.controller");
 
+
+const workFlowSkillsRecommended = async (user_id) => {
+    try {
+        const user = await User.findById(user_id);
+        if (!user) {
+            return console.log("User not found");
+        }
+        const preassessment = await Preassessment.findOne({ user: user_id });
+        if (!preassessment) {
+            return console.log("Preassessment not found");
+        }
+        const skillsRecommendation = await getSkillsWhichUserShouldFocusOn(preassessment);
+        const allSkills = skillsRecommendation.crucialSkillsAndKnowledgeGaps.map(skill => {
+            return {
+                skill: skill.name,
+                why: skill.description
+            }
+        });
+
+        if (preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal) {
+            preassessment.feedback.for_career_goal.name = preassessment.user_profile.career_goal;
+            preassessment.feedback.for_career_goal.skills_to_focus = allSkills;
+            await preassessment.save();
+        }
+
+
+
+        console.log("Skills recommendation generated successfully:", allSkills);
+    } catch (error) {
+        console.error("Error generating skills recommendation:", error);
+    }
+}
 
 const workFlowLearningPath = async (user_id) => {
     try{
         const preassessment = await Preassessment.findOne({ user: user_id });
         if (!preassessment) {
-            return res.status(404).json({ message: "Pre-assessment data not found." });
+            console.log("Preassessment not found");
+            return;
         }
+        console.log("Generating learning path for user:", preassessment.user_profile.career_goal);
 
         // Extract skills to focus on
         const skillsToFocus = preassessment.feedback.for_career_goal.skills_to_focus.map((skill) => {
@@ -21,6 +55,8 @@ const workFlowLearningPath = async (user_id) => {
                 _id: skill._id
             }
         });
+
+        console.log("Skills to focus on:", skillsToFocus);  
 
         // Initialize the learning path array
         const skillBasedLearningPath = [];
@@ -55,7 +91,7 @@ const workFlowLearningPath = async (user_id) => {
         // Save the generated learning path in the database
         const learningPath = await LearningPath.create({
             career_goal: preassessment.user_profile.career_goal,
-            user: req.user._id,
+            user: user_id,
             skills: skillBasedLearningPath,
 
         });
@@ -69,12 +105,17 @@ const workFlowLearningPath = async (user_id) => {
 const workflowCreateAllQuizzes = async (user_id) => {
     try{
         const user = await User.findById(user_id);
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user){
+            console.log("User not found");
+            return
+        }
 
         // Validate learning path existence
-        const learningPath = await LearningPath.findOne({ user: req.user._id });
-        if (!learningPath) return res.status(404).json({ message: 'Learning Path not found' });
-
+        const learningPath = await LearningPath.findOne({ user: user_id});
+        if (!learningPath){
+            console.log("Learning path not found");
+            return
+        }
         // Prepare data for quiz generation
         const skills = learningPath.skills.map(skill => ({
             skill_name: skill.name,
@@ -97,7 +138,7 @@ const workflowCreateAllQuizzes = async (user_id) => {
 
         // Create the assessment document
         const newAssessment = await Assessment.create({
-            user: req.user._id,
+            user: user_id,
             skillsToDevelop: quizzes,
         });
 
@@ -131,7 +172,10 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
         });
         console.log(extractSpecificSkillsLearningContent);
         const preassessmentData = await Preassessment.findOne({user: user});
-        if(!preassessmentData) return res.status(404).json({message: "Preassessment not found"});
+        if(!preassessmentData){
+            console.log("Preassessment not found");
+            return;
+        }
 
         console.log("Generating CouseContent from GenAI");
         for(const x of extractSpecificSkillsLearningContent){
@@ -171,7 +215,7 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
     }
 }
 
-const workFlowContentGenFn = async (req, res) => {
+const workFlowContentGenFn = async (req,res) => {
     try {
         const userId = req.user._id; // Access req.user._id directly
         const doesUserExist = await User.findById(userId);
@@ -179,7 +223,10 @@ const workFlowContentGenFn = async (req, res) => {
             return res.status(404).send({ message: 'User not found' });
         }
 
+        console.log(`Generating workFlow content for user: ${userId}`);
+
         // Sequential execution of the steps
+        await workFlowSkillsRecommended(userId);
         await workFlowLearningPath(userId);
         await workflowCreateAllQuizzes(userId);
         await workFlowGenerateLearningPathContent(userId);
