@@ -303,13 +303,17 @@ const generateCourseContentFromAI = async (chapters, preassessmentData, skill_na
                         "topic": "Specific topic here.",
                         "for_skill": "Skill name here.",
                         "content": [
-                            {
-                                "title": "Chapter 1 Title",
-                                "description": "Chapter 1 Content",
-                                "content": "Chapter 1 Content",
-                                "duration": "Chapter 1 Duration",
-                            }
-                        ]
+        {
+            "title": "Chapter 1 Title",
+            "description": "Chapter 1 Content",
+            "content": "InDepth summary of the chapter 1",
+            "objectives": ["Objective 1", "Objective 2"],
+            "real_world_examples": ["Example 1", "Example 2"],
+            "learning_outcomes": ["Outcome 1", "Outcome 2"],
+            "key_points": ["Key Point 1", "Key Point 2"],
+            
+        }
+    ]
             }
             \`\`\`
         `;
@@ -317,6 +321,7 @@ const generateCourseContentFromAI = async (chapters, preassessmentData, skill_na
         const result = await chatSession.sendMessage(prompt);
         const data = result.response.text();
         const cleanedData = data.replace(/```json|```/g, '');
+        console.log('cleanedData:', cleanedData);
         return JSON.parse(cleanedData);
 
     } catch (error) {

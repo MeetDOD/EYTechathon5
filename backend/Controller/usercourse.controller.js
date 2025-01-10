@@ -1,5 +1,5 @@
 const { User } = require('../Models/user.model');
-const Course = require('../Models/usercourse.model');
+const {Course} = require('../Models/usercourse.model');
 
 const addCourse = async (req, res) => {
     try {
@@ -104,25 +104,25 @@ const updateProgress = async (req, res) => {
         const userId = req.user._id;
         const { courseId, progress, activeChapterIndex } = req.body;
 
+        console.log('updateProgress', req.body);
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const course = user.enrolledCourses.find(enrolled => enrolled.course.toString() === courseId);
-        if (!course) {
-            return res.status(404).json({ message: 'User is not enrolled in this course' });
+        const courses = await Course.findOne({belongs_to: userId, _id: courseId});
+        if (!courses) {
+            return res.status(404).json({ message: 'Course not found' });
         }
-
-        course.progress = progress;
-        course.activeChapterIndex = activeChapterIndex + 1;
-
-        await user.save();
-
+        courses.progress = progress;
+        courses.activeChapterIndex = activeChapterIndex;
+        console.log('courses', courses.topic, "progress", courses.progress);
+        await courses.save();
         res.status(200).json({ 
             message: 'Progress updated successfully', 
-            progress: course.progress, 
-            activeChapterIndex: course.activeChapterIndex
+            progress: courses.progress,
+            activeChapterIndex: user.activeChapterIndex
         });
     } catch (error) {
         console.error('Error updating progress:', error);
