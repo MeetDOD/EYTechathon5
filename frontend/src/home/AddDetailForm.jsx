@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { MdCancel } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
+import { faker } from '@faker-js/faker';
+
 
 const AddDetailForm = () => {
     const [isFormValid, setIsFormValid] = useState(false);
@@ -50,6 +52,33 @@ const AddDetailForm = () => {
             setShowAddDetailsDialog(true);
         }
     }, [user]);
+
+
+    const autofillFormData = () => {
+        const randomSkills = Array.from({ length: 3 }, () => faker.hacker.verb());
+        setFormData({
+            phoneno: faker.phone.number('+91 ##########'),
+            gender: faker.helpers.arrayElement(['Male', 'Female', 'Other']),
+            dateofbirth: faker.date.birthdate({ min: 18, max: 35, mode: 'age' }).toISOString().split('T')[0],
+            collegename: faker.company.name(),
+            university: `${faker.address.city()} University`,
+            education_level: faker.helpers.arrayElement(['High School', 'Bachelor', 'Master', 'PhD']),
+            interested_field: faker.helpers.arrayElement(['Software Engineering', 'Data Science', 'Cybersecurity', 'AI/ML', 'UI/UX Design']),
+            career_goal: faker.lorem.sentence(),
+            occupation: faker.helpers.arrayElement(['Student', 'Intern', 'Freelancer', 'Part-time Job']),
+            address: faker.address.streetAddress(),
+            skills_experience: randomSkills,
+            verbal: faker.helpers.arrayElement(['Beginner', 'Intermediate', 'Advanced']),
+            written: faker.helpers.arrayElement(['Beginner', 'Intermediate', 'Advanced']),
+            technical_skills: faker.number.int({ min: 1, max: 5 }),
+            teamwork_skills: faker.number.int({ min: 1, max: 5 }),
+            analytical_thinking: faker.helpers.arrayElement(['Beginner', 'Intermediate', 'Advanced']),
+            prefer_collaborative_learning: faker.datatype.boolean(),
+            prefer_reading: faker.datatype.boolean(),
+            time_commitment: faker.number.int({ min: 1, max: 40 }),
+        });
+    };
+
 
     const isFormValidMemo = useMemo(() => {
         return (
@@ -176,7 +205,11 @@ const AddDetailForm = () => {
                         </DialogDescription>
                     </DialogHeader>
 
+                        <button className="bg-primary text-white px-4 py-2 rounded-lg" onClick={autofillFormData}>
+                            Autofill Form
+                        </button>
                     <form className='grid gap-6'>
+                    
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                             <div className='flex flex-col space-y-2'>
                                 <Label htmlFor='phoneno' className='font-medium'>

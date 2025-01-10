@@ -1,5 +1,10 @@
 const LearningPath = require("../Models/learningpath.model");
 const { User } = require("../Models/user.model");
+const {Preassessment}  = require("../Models/preassessment.model");
+const Assessment = require("../Models/assessment.model");
+const {Course, Content} = require("../Models/usercourse.model.js")
+const { generateCourseContentFromAI } = require("./ai.controller");
+const {fetchRelevantImage } = require("../utils/thumbnailGenerator.js");
 
 const getLearningPath = async (req, res) => {
     try {
@@ -59,4 +64,60 @@ const getRespectiveLearningPath = async (req, res) => {
     }
 }
 
-module.exports = { getLearningPath, getRespectiveLearningPath };
+const generateLearningPathContent = async (req,res) => {
+    try{
+        const user = req.user._id;
+        const doesUserExists = await User.findById(user);
+        if(!doesUserExists) return res.status(404).json({message: "User not found"});
+        const learningPath = await LearningPath.findOne({user: user});
+        const extractSpecificSkillsLearningContent = learningPath.skills.map((skill) => {
+            console.log(skill.chapters);
+            return {
+                name: skill.name,
+                chapters: skill.chapters,
+            }
+        });
+        console.log(extractSpecificSkillsLearningContent);
+        const preassessmentData = await Preassessment.findOne({user: user});
+        if(!preassessmentData) return res.status(404).json({message: "Preassessment not found"});
+
+        console.log("Generating CouseContent from GenAI");
+        for(const x of extractSpecificSkillsLearningContent){
+            console.log(`Generating Course Content for ${x.name}`);
+            const response = await generateCourseContentFromAI(x.chapters,preassessmentData, x.name);
+            const thumbnailPic = await fetchRelevantImage(response.topic);
+            const newCourse = await Course.create({
+                belongs_to: user,
+                courseName: response.courseName,
+                category: response.category,
+                courseLevel: response.courseLevel,
+                language: response.language,
+                topic: response.topic,
+                for_skill: x.name,
+                thumbnail: thumbnailPic,
+                description: response.description,
+            });
+            const content = response.content.map((content) => {
+                return {
+                    title: content.title,
+                    content: content.content,
+                    duration: content.duration,
+                    courseId: newCourse._id,
+                    description: content.description
+                }
+            });
+
+            const newContent = await Content.insertMany(content);
+
+            newCourse.content = newContent.map((content) => content._id);
+            await newCourse.save();
+            console.log(`Course Content Generated for ${x.name}`);
+        }
+
+        return res.status(200).json({message: "Learning Path Content Generated Successfully"});
+    }catch(e){
+        console.log(e);
+    }
+}
+
+module.exports = { getLearningPath, getRespectiveLearningPath, generateLearningPathContent };

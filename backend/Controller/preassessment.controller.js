@@ -58,12 +58,12 @@ const getUserPreAssessmentData = async (req, res) => {
                 await preassessment.save();
             }
         }
-        if(flag){
+        if (flag) {
             return res.status(200).json({
                 message: "Generated pre-assessment data successfully.",
                 preassessment: preassessment
             });
-        }else{
+        } else {
             return res.status(200).json({
                 message: "Fetched pre-assessment data successfully.",
                 preassessment: preassessment
@@ -131,6 +131,23 @@ const savePreAssessment = async (req, res) => {
         await doesUserExist.save();
 
         console.log("Pre-assessment saved successfully:", newPreassessment._id);
+        const authHeader = req.headers["authorization"];
+        const token = authHeader && authHeader.split(" ")[1];
+
+        const triggerWorkflowToGenAIContent = await fetch(`${process.env.N8N_WEBHOOK_URL}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: token,
+            })
+        });
+
+        const result = await triggerWorkflowToGenAIContent.json();
+        console.log("Result from N8N workflow trigger:", result);
+
+
 
 
         return res.status(201).json({

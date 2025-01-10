@@ -5,11 +5,13 @@ const bodyParser = require('body-parser');
 const connectToDB = require('./Config/db')
 const cookieParser = require('cookie-parser');
 const userRoute = require('./Routes/user.route');
-const courseRoutes = require('./Routes/usercourse.route');
+const courseRoutes = require('./Routes/courses.route');
 const resumeRoutes = require('./Routes/userresume.route');
 const preassessmentRoutes = require('./Routes/preassessment.route');
 const learningpathRoutes = require('./Routes/learningpath.route');
 const assessmentRoutes = require('./Routes/assessment.route');
+const workflowRoutes = require('./Routes/workflow.route');
+
 const fileUpload = require('express-fileupload');
 // const googlemeetroute = require('./Routes/googlemeetauth.route');
 const { cloudnairyconnect } = require("./Config/cloudinary");
@@ -32,11 +34,12 @@ app.use(fileUpload({ useTempFiles: true }))
 
 
 app.use("/api/user", userRoute);
-app.use("/api/usercourse", courseRoutes);
+app.use("/api/courses", courseRoutes);
 app.use("/api/userresume", resumeRoutes);
 app.use("/api/preassessment", preassessmentRoutes);
 app.use("/api/learningpath", learningpathRoutes);
 app.use("/api/assessment", assessmentRoutes);
+app.use("/api/workflow", workflowRoutes);
 
 const startServer = async () => {
     await connectToDB();

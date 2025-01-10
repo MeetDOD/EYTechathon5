@@ -18,8 +18,11 @@ const CoursesPage = () => {
         const fetchCourses = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/getallcourses`);
-                setCourses(response.data.courses.reverse());
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/all-courses`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                });
+                console.log(response.data.data)
+                setCourses(response.data.data);
             } catch (err) {
                 toast.error("Failed to fetch courses");
             } finally {
@@ -92,7 +95,7 @@ const CoursesPage = () => {
                             style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)` }}
                         >
                             <img
-                                src={course.thumbnail}
+                                src={course.thumbnail || "https://preview.redd.it/vkg7a1nlxvl61.png?auto=webp&s=924f9cce333b1f436e056bd6ee0b73da5a907bb7"}
                                 alt={course.courseName}
                                 className="w-full rounded-lg h-40 object-cover"
                             />

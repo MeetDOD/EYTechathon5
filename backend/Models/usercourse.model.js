@@ -1,29 +1,73 @@
 const mongoose = require('mongoose');
 
-const SectionSchema = new mongoose.Schema({
-    subtitle: String,
-    content: String,
-});
 
-const ChapterSchema = new mongoose.Schema({
-    title: String,
-    explanation: String,
-    sections: [SectionSchema],
-    videoId: String,
-    duration: String,
+const ContentSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+    },
+    content: {
+        type: String,
+        required: true,
+    },
+    videoId: {
+        type: String,
+        required: false,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    duration: {
+        type: String,
+        required: false,
+    },
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
 });
 
 const CourseSchema = new mongoose.Schema({
-    thumbnail:String,
+    thumbnail:{
+        type: String,
+        required: false,
+    },
     courseName: { type: String, required: true },
-    category: String,
-    courseLevel: String,
-    duration: String,
-    language: String,
-    topic: String,
-    description: String,
-    chapters: [ChapterSchema],
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    category: {
+        type: String,
+        required: true,
+    },
+    courseLevel: {
+        type: String,
+        required: true,
+    },
+    for_skill: {
+        type: String,
+        required: true,
+    },
+    duration: {
+        type: String,
+        required: false,
+    },
+    language: {
+        type: String,
+        required: true,
+    },
+    topic: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    content: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Content',
+    }],
+    belongs_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 },{timestamps:true});
 
-module.exports = mongoose.model('Course', CourseSchema);
+const Course = mongoose.model('Course', CourseSchema);
+const Content = mongoose.model('Content', ContentSchema);
+
+module.exports = { Course, Content };
+
