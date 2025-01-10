@@ -18,6 +18,10 @@ const ContentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    objectives: [String],
+    real_world_examples: [String],
+    learning_outcomes: [String],
+    key_points: [String],
     duration: {
         type: String,
         required: false,
@@ -64,6 +68,16 @@ const CourseSchema = new mongoose.Schema({
         ref: 'Content',
     }],
     belongs_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    progress: {
+        type: Number,
+        default: 0,
+        required: false,
+    },
+    activeChapterIndex: {
+        type: Number,
+        default: 0,
+        required: false,
+    },
 },{timestamps:true});
 
 const Course = mongoose.model('Course', CourseSchema);

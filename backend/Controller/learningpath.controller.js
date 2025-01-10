@@ -103,7 +103,11 @@ const generateLearningPathContent = async (req,res) => {
                     content: content.content,
                     duration: content.duration,
                     courseId: newCourse._id,
-                    description: content.description
+                    description: content.description,
+                    objectives: content.objectives,
+                    real_world_examples: content.real_world_examples,
+                    learning_outcomes: content.learning_outcomes,
+                    key_points: content.key_points,
                 }
             });
 

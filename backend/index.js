@@ -10,7 +10,9 @@ const resumeRoutes = require('./Routes/userresume.route');
 const preassessmentRoutes = require('./Routes/preassessment.route');
 const learningpathRoutes = require('./Routes/learningpath.route');
 const assessmentRoutes = require('./Routes/assessment.route');
+const usercourseRoutes = require('./Routes/usercourse.route');
 const workflowRoutes = require('./Routes/workflow.route');
+const { getARelevantYtVideoForCourseContent } = require('./Controller/workflow.controller');
 
 const fileUpload = require('express-fileupload');
 // const googlemeetroute = require('./Routes/googlemeetauth.route');
@@ -36,6 +38,7 @@ app.use(fileUpload({ useTempFiles: true }))
 app.use("/api/user", userRoute);
 app.use("/api/courses", courseRoutes);
 app.use("/api/userresume", resumeRoutes);
+app.use("/api/usercourse", usercourseRoutes);
 app.use("/api/preassessment", preassessmentRoutes);
 app.use("/api/learningpath", learningpathRoutes);
 app.use("/api/assessment", assessmentRoutes);
@@ -47,8 +50,12 @@ const startServer = async () => {
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);
     });
+
 }
 
+
 startServer();
+
+
 
 

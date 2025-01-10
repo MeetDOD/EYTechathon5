@@ -5,7 +5,7 @@ const { User } = require("../Models/user.model");
 const { Course, Content } = require("../Models/usercourse.model");
 const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
 const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn } = require("./ai.controller");
-
+require("dotenv").config();
 
 const workFlowSkillsRecommended = async (user_id) => {
     try {
@@ -40,7 +40,7 @@ const workFlowSkillsRecommended = async (user_id) => {
 }
 
 const workFlowLearningPath = async (user_id) => {
-    try{
+    try {
         const preassessment = await Preassessment.findOne({ user: user_id });
         if (!preassessment) {
             console.log("Preassessment not found");
@@ -56,7 +56,7 @@ const workFlowLearningPath = async (user_id) => {
             }
         });
 
-        console.log("Skills to focus on:", skillsToFocus);  
+        console.log("Skills to focus on:", skillsToFocus);
 
         // Initialize the learning path array
         const skillBasedLearningPath = [];
@@ -97,22 +97,22 @@ const workFlowLearningPath = async (user_id) => {
         });
 
         console.log("Learning path saved successfully:", learningPath._id);
-    }catch(e){
+    } catch (e) {
         console.log(e)
     }
 }
 
 const workflowCreateAllQuizzes = async (user_id) => {
-    try{
+    try {
         const user = await User.findById(user_id);
-        if (!user){
+        if (!user) {
             console.log("User not found");
             return
         }
 
         // Validate learning path existence
-        const learningPath = await LearningPath.findOne({ user: user_id});
-        if (!learningPath){
+        const learningPath = await LearningPath.findOne({ user: user_id });
+        if (!learningPath) {
             console.log("Learning path not found");
             return
         }
@@ -152,17 +152,17 @@ const workflowCreateAllQuizzes = async (user_id) => {
 
         await learningPath.save();
 
-    }catch(e){
+    } catch (e) {
         console.log(e)
     }
 }
 
 const workFlowGenerateLearningPathContent = async (user_id) => {
-    try{
+    try {
         const user = user_id;
         const doesUserExists = await User.findById(user);
-        if(!doesUserExists) return res.status(404).json({message: "User not found"});
-        const learningPath = await LearningPath.findOne({user: user});
+        if (!doesUserExists) return res.status(404).json({ message: "User not found" });
+        const learningPath = await LearningPath.findOne({ user: user });
         const extractSpecificSkillsLearningContent = learningPath.skills.map((skill) => {
             console.log(skill.chapters);
             return {
@@ -171,16 +171,16 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
             }
         });
         console.log(extractSpecificSkillsLearningContent);
-        const preassessmentData = await Preassessment.findOne({user: user});
-        if(!preassessmentData){
+        const preassessmentData = await Preassessment.findOne({ user: user });
+        if (!preassessmentData) {
             console.log("Preassessment not found");
             return;
         }
 
         console.log("Generating CouseContent from GenAI");
-        for(const x of extractSpecificSkillsLearningContent){
+        for (const x of extractSpecificSkillsLearningContent) {
             console.log(`Generating Course Content for ${x.name}`);
-            const response = await generateCourseContentFromAI(x.chapters,preassessmentData, x.name);
+            const response = await generateCourseContentFromAI(x.chapters, preassessmentData, x.name);
             const thumbnailPic = await fetchRelevantImage(response.topic);
             const newCourse = await Course.create({
                 belongs_to: user,
@@ -199,7 +199,11 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
                     content: content.content,
                     duration: content.duration,
                     courseId: newCourse._id,
-                    description: content.description
+                    description: content.description,
+                    objectives: content.objectives,
+                    real_world_examples: content.real_world_examples,
+                    learning_outcomes: content.learning_outcomes,
+                    key_points: content.key_points,
                 }
             });
 
@@ -210,12 +214,114 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
             console.log(`Course Content Generated for ${x.name}`);
         }
 
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
 }
 
-const workFlowContentGenFn = async (req,res) => {
+const fetchRelevantVideoId = async (query, description) => {
+    const apiKey = process.env.YT_API_KEY;
+
+    const params = {
+        part: 'snippet',
+        q: query + " " + description,
+        maxResults: 1,
+        type: 'video',
+        key: apiKey
+    };
+
+    const searchApiUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams(params).toString()}`;
+    try {
+        const searchResponse = await fetch(searchApiUrl);
+        const searchData = await searchResponse.json();
+
+        if (!searchData.items || searchData.items.length === 0) {
+            console.log(`No video found for query: ${query}`);
+            return null;
+        }
+
+        console.log(`Searching for relevant video for query: "${query}"`);
+
+        let bestMatch = null;
+
+        for (const item of searchData.items) {
+            const videoTitle = item.snippet.title.toLowerCase();
+            const videoDescription = item.snippet.description.toLowerCase();
+
+            // Split the query and description into words
+            const queryWords = query.toLowerCase().split(/\s+/);
+            const descriptionWords = description.toLowerCase().split(/\s+/);
+
+            // Check if any word from the query or description is present in the video title or description
+            const isMatch = queryWords.some(word => videoTitle.includes(word) || videoDescription.includes(word)) ||
+                descriptionWords.some(word => videoTitle.includes(word) || videoDescription.includes(word));
+
+            if (isMatch) {
+                console.log(`Found a relevant video: ${item.id.videoId} for query: "${query}"`);
+                bestMatch = item.id.videoId;
+                break; // Stop the loop once we find the first match
+            }
+        }
+
+        if (bestMatch) {
+            console.log(`Best match video ID: ${bestMatch}`);
+        } else {
+            console.log('No relevant videos found.');
+        }
+
+        return bestMatch;
+    } catch (error) {
+        console.error("Error fetching video data:", error);
+        return null;
+    }
+};
+
+
+const getARelevantYtVideoForCourseContent = async (user_id) => {
+    try {
+        console.log(`Fetching user with ID: ${user_id}`);
+        const user = await User.findById(user_id);
+        if (!user) {
+            console.log(`User not found for ID: ${user_id}`);
+            return;
+        }
+
+        console.log(`Fetching course content for user ID: ${user_id}`);
+        const courseContents = await Course.find({ belongs_to: user_id }).populate('content');
+        if (!courseContents || courseContents.length === 0) {
+            console.log(`No course content found for user ID: ${user_id}`);
+            return;
+        }
+
+        console.log(`Processing course topics for user ID: ${user_id}`);
+        for (const course of courseContents) {
+            for (const content of course.content) {
+                const topic = content.title;
+                const description = content.description;
+                console.log(`Processing content: "${topic}"`);
+
+                const videoId = await fetchRelevantVideoId(topic, description);
+
+                if (!videoId) {
+                    console.log(`No relevant video found for content: "${topic}"`);
+                    continue;
+                }
+
+                content.videoId = videoId;
+                await content.save();
+                console.log(`Updated content "${topic}" with video ID: ${videoId}`);
+            }
+        }
+
+        console.log(`Completed updating YouTube videos for user ID: ${user_id}`);
+    } catch (e) {
+        console.error(`Error processing YouTube videos for user ID: ${user_id}`, e);
+    }
+};
+
+
+
+const workFlowContentGenFn = async (req, res) => {
     try {
         const userId = req.user._id; // Access req.user._id directly
         const doesUserExist = await User.findById(userId);
@@ -226,10 +332,11 @@ const workFlowContentGenFn = async (req,res) => {
         console.log(`Generating workFlow content for user: ${userId}`);
 
         // Sequential execution of the steps
-        await workFlowSkillsRecommended(userId);
-        await workFlowLearningPath(userId);
-        await workflowCreateAllQuizzes(userId);
+        // await workFlowSkillsRecommended(userId);
+        // await workFlowLearningPath(userId);
+        // await workflowCreateAllQuizzes(userId);
         await workFlowGenerateLearningPathContent(userId);
+        await getARelevantYtVideoForCourseContent(userId);
 
         // Update user status and save
         doesUserExist.contentGenerated = true;
@@ -242,4 +349,6 @@ const workFlowContentGenFn = async (req,res) => {
     }
 };
 
-module.exports = { workFlowContentGenFn };
+
+
+module.exports = { workFlowContentGenFn, getARelevantYtVideoForCourseContent };

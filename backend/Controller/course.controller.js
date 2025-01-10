@@ -57,7 +57,9 @@ const getCourseContents = async (req, res) => {
         res.status(200).json({
             message: "Course content found",
             forCourseName: course.courseName,
-            data: courseContents.content
+            data: courseContents.content,
+            progress: course.progress,
+            activeChapterIndex: course.activeChapterIndex
         });
         
     }catch(error){

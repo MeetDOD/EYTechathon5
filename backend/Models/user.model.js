@@ -65,6 +65,13 @@ const userSchema = new mongoose.Schema({
             activeChapterIndex: { type: Number, default: 0 }    
         }
     ],
+    coursesProgress: [
+        {
+            course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+            progress: { type: Number, default: 0 },
+            activeChapterIndex: { type: Number, default: 0 }
+        }
+    ],
     hasGivenPreAssessment: {
         type: Boolean,
         default: false

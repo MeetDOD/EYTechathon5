@@ -11,7 +11,6 @@ import { GiPartyPopper } from "react-icons/gi";
 import Confetti from 'react-confetti';
 
 const StartCourse = () => {
-
     const { id } = useParams();
     const [contents, setContents] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -21,38 +20,50 @@ const StartCourse = () => {
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
     const navigate = useNavigate();
 
-    const poperSizeDetect = () => {
-        const width = document.documentElement.clientWidth;
-        const height = window.innerHeight;
-        setWindowSize({ width, height });
-    };
-
+    // Window resize handler
     useEffect(() => {
-        window.addEventListener('resize', poperSizeDetect);
-        poperSizeDetect();
-        return () => {
-            window.removeEventListener('resize', poperSizeDetect);
-        }
-    }, [windowSize]);
+        const handleResize = () => {
+            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+        };
 
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initialize
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    // Fetch course data
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/course-contents/${id}`,{
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/course-contents/${id}`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${localStorage.getItem('token')}`,
                     }
                 });
-                setContents(response.data.data);
-                setCourseName(response.data.forCourseName);
 
+                const { data, activeChapterIndex: fetchedActiveIndex, forCourseName } = response.data;
+
+                setContents(data);
+                setCourseName(forCourseName);
+
+                // Retrieve saved index from localStorage
                 const savedIndex = parseInt(localStorage.getItem(`progress_${id}`), 10);
-                if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < response.data.data.length) {
+
+                // Validate savedIndex
+                if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < data.length) {
                     setActiveChapterIndex(savedIndex);
+                } else if (typeof fetchedActiveIndex === 'number' && fetchedActiveIndex >= 0 && fetchedActiveIndex < data.length) {
+                    setActiveChapterIndex(fetchedActiveIndex);
+                } else {
+                    setActiveChapterIndex(0); // Default to first chapter
                 }
             } catch (error) {
                 console.error('Error fetching course:', error);
+                toast.error('Failed to load course. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -61,6 +72,7 @@ const StartCourse = () => {
         fetchCourse();
     }, [id]);
 
+    // Handle navigation between chapters
     const handleNavigation = (newIndex) => {
         if (newIndex >= 0 && newIndex < contents.length) {
             setActiveChapterIndex(newIndex);
@@ -69,6 +81,7 @@ const StartCourse = () => {
         }
     };
 
+    // Handle course completion
     const handleFinish = async () => {
         try {
             const totalChapters = contents.length;
@@ -99,10 +112,10 @@ const StartCourse = () => {
         }
     };
 
+    // Update user progress
     const updateUserProgress = async () => {
         try {
-            const totalChapters = contents.length;
-            const progress = Math.round(((activeChapterIndex + 1) / totalChapters) * 100);
+            const progress = Math.round(((activeChapterIndex + 1) / contents.length) * 100);
             await axios.put(
                 `${import.meta.env.VITE_BASE_URL}/api/usercourse/updateprogress`,
                 {
@@ -119,13 +132,25 @@ const StartCourse = () => {
             toast.success("Your course progress updated");
         } catch (error) {
             console.error('Error updating progress:', error);
+            toast.error("Failed to update progress.");
         }
     };
 
+    // Handle button click for Next/Finish
+    const handleNextOrFinish = () => {
+        if (activeChapterIndex === contents.length - 1) {
+            handleFinish();
+        } else {
+            handleNavigation(activeChapterIndex + 1);
+            updateUserProgress();
+        }
+    };
 
     if (loading) {
         return (
-            <Loader />
+            <div className="flex items-center justify-center h-screen">
+                <Loader />
+            </div>
         );
     }
 
@@ -133,7 +158,7 @@ const StartCourse = () => {
         return <p className="text-center text-xl mt-10">Course not found.</p>;
     }
 
-    const activeChapter = contents?.[activeChapterIndex] || contents[0];
+    const activeChapter = contents[activeChapterIndex];
 
     return (
         <div>
@@ -148,16 +173,17 @@ const StartCourse = () => {
                 <div className="shadow-md border rounded-xl border-gray-300 lg:w-1/4 p-4 h-screen lg:sticky top-0 overflow-y-auto" style={{ borderColor: `var(--borderColor)` }}>
                     <h2 className="text-lg font-bold mb-4 border-b pb-4" style={{ borderColor: `var(--borderColor)` }}>{courseName}</h2>
                     <ul className="space-y-2">
-                        {contents?.map((content, index) => (
+                        {contents.map((content, idx) => (
                             <li
-                                key={index}
-                                className={`px-3 py-2 rounded-lg ${activeChapterIndex === index
+                                key={idx}
+                                onClick={() => handleNavigation(idx)}
+                                className={`px-3 py-2 rounded-lg cursor-pointer ${activeChapterIndex === idx
                                     ? 'bg-purple-100 text-black font-semibold'
-                                    : ' '
+                                    : ''
                                     }`}>
                                 <div className='grid grid-cols-5 items-center'>
                                     <div>
-                                        <h2 className='p-1 bg-primary text-white rounded-full w-8 h-8 text-center'>{index + 1}</h2>
+                                        <h2 className='p-1 bg-primary text-white rounded-full w-8 h-8 text-center'>{idx + 1}</h2>
                                     </div>
                                     <div className='col-span-4'>
                                         <h2 className='font-medium'>{`${content?.title}`}</h2>
@@ -176,7 +202,6 @@ const StartCourse = () => {
                             <CardDescription className="text-lg text-justify font-semibold">{activeChapter?.explanation}</CardDescription>
                         </CardHeader>
                         <CardContent>
-
                             {activeChapter?.videoId && (
                                 <div className="mb-6">
                                     <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
@@ -189,23 +214,50 @@ const StartCourse = () => {
                                         ></iframe>
                                     </div>
                                 </div>
-
                             )}
 
-                            <h2 className="text-xl mb-5 font-bold">Detailed <span className='text-primary'>Explaination</span></h2>
-                            {activeChapter?.sections && activeChapter?.sections.length > 0 && (
-                                <div className="space-y-5">
-                                    {activeChapter.sections.map((section, secIndex) => (
-                                        <div
-                                            key={secIndex}
-                                            className='p-5 courseSection rounded-xl'
-                                        >
-                                            <h3 className="text-xl font-bold pb-2"><span className='text-2xl'>{secIndex + 1}.</span> {section?.subtitle}</h3>
-                                            <p className="font-medium text-lg text-justify tracking-tight">{section?.content}</p>
-                                        </div>
+                            <h2 className="text-xl mb-5 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
+
+                            {/* Objectives Section */}
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-200 mb-3">Objectives</h3>
+                                <ul className="list-disc pl-6 space-y-2">
+                                    {activeChapter?.objectives.map((objective, idx) => (
+                                        <li key={idx} className="text-gray-300">{objective}</li>
                                     ))}
-                                </div>
-                            )}
+                                </ul>
+                            </div>
+
+                            {/* Real World Examples Section */}
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-200 mb-3">Real-World Examples</h3>
+                                <ul className="list-decimal pl-6 space-y-2">
+                                    {activeChapter?.real_world_examples.map((example, idx) => (
+                                        <li key={idx} className="text-gray-300">{example}</li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Learning Outcomes Section */}
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-200 mb-3">Learning Outcomes</h3>
+                                <ul className="list-inside space-y-2">
+                                    {activeChapter?.learning_outcomes.map((outcome, idx) => (
+                                        <li key={idx} className="text-gray-300">{outcome}</li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Key Points Section */}
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-200 mb-3">Key Points</h3>
+                                <ul className="list-inside space-y-2">
+                                    {activeChapter?.key_points.map((point, idx) => (
+                                        <li key={idx} className="text-gray-300">{point}</li>
+                                    ))}
+                                </ul>
+                            </div>
+
                             <div className='flex flex-row gap-2 justify-between mt-5'>
                                 <Button
                                     variant="secondary"
@@ -218,14 +270,7 @@ const StartCourse = () => {
                                 </Button>
                                 <Button
                                     size="sm"
-                                    onClick={() => {
-                                        if (activeChapterIndex === contents.length - 1) {
-                                            handleFinish();
-                                        } else {
-                                            handleNavigation(activeChapterIndex + 1);
-                                            updateUserProgress();
-                                        }
-                                    }}
+                                    onClick={handleNextOrFinish}
                                     className="flex gap-2 px-5"
                                 >
                                     {activeChapterIndex === contents.length - 1
@@ -242,4 +287,4 @@ const StartCourse = () => {
     )
 }
 
-export default StartCourse
+export default StartCourse;
