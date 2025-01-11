@@ -78,7 +78,48 @@ const getAssessmentDetailsForAParticularSkill = async (req, res) => {
     }
 };
 
+
+const scoreAssessment = async (req, res) => {
+    try {
+        const { assessmentId } = req.params;
+
+        // Directly destructure if submission is sent as the body
+        const {answers } = req.body;
+        const userId = req.user._id;
+        console.log(answers);
+
+        // Validate user existence
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const assessment = await Assessment.findOne({ user: userId });
+        if (!assessment) return res.status(404).json({ message: 'Assessment not found' });
+
+        const skill = assessment.skillsToDevelop.find(skill => skill.preassessment_skill_id === assessmentId);
+        if (!skill) return res.status(404).json({ message: 'Skill not found' });
+
+        // Calculate score
+        const correctAnswers = skill.questions.map(question => question.correctAnswer);
+        console.log(correctAnswers);
+        const score = correctAnswers.reduce((total, correctAnswer, index) => {
+            return correctAnswer === answers[index] ? total + 1 : total;
+        }, 0);
+
+        // Update user's learning path with the score
+        skill.score = score;
+
+        await assessment.save();
+
+        return res.status(200).json({ message: 'Assessment scored successfully', data: { score } });
+    } catch (error) {
+        console.error('Error submitting assessment:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+
 module.exports = {
     createAllQuizzes,
     getAssessmentDetailsForAParticularSkill,
+    scoreAssessment,
 };

@@ -135,13 +135,11 @@ const savePreAssessment = async (req, res) => {
         const token = authHeader && authHeader.split(" ")[1];
 
         const triggerWorkflowToGenAIContent = await fetch(`${process.env.N8N_WEBHOOK_URL}`, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                token: token,
-            })
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         const result = await triggerWorkflowToGenAIContent.json();
