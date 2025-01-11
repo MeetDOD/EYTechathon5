@@ -50,7 +50,7 @@ const DetailAssessment = () => {
 
         try {
             console.log(submission);
-            const res = await fetch(`http://localhost:4000/api/assessment/submit/${assessmentid}`, {
+            const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/assessment/submit/${assessmentid}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -86,7 +86,7 @@ const DetailAssessment = () => {
         if (!assessmentid) return;
         const fetchAssessmentQuestions = async () => {
             try {
-                const res = await axios.get(`http://localhost:4000/api/assessment/${assessmentid}`, {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/assessment/${assessmentid}`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${localStorage.getItem("token")}`,
