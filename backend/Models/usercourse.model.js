@@ -18,6 +18,10 @@ const ContentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    detailed_content: {
+        type: String,
+        required: false,
+    },
     objectives: [String],
     real_world_examples: [String],
     learning_outcomes: [String],

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Loader from '@/services/Loader';
 import { GiPartyPopper } from "react-icons/gi";
 import Confetti from 'react-confetti';
+import ReactMarkdown from 'react-markdown';
 
 const StartCourse = () => {
     const { id } = useParams();

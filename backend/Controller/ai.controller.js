@@ -331,4 +331,40 @@ const generateCourseContentFromAI = async (chapters, preassessmentData, skill_na
 }
 
 
-module.exports = { generateCourseContentFromAI, generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn }
+const generateDetailContentForCourseFromAI = async (chapter_about) => {
+    try {
+        const sanitize = (str) =>
+            str.replace(/[\n\r\t]/g, ' ').replace(/"/g, '\\"');
+
+        const prompt = `
+            Provide a detailed explanation of the chapter titled "${sanitize(chapter_about.title)}" based on the following details:
+
+            - **Description**: ${sanitize(chapter_about.description)}
+
+            - **Objectives**:
+            ${chapter_about.objectives.map((objective, index) => `${index + 1}. ${sanitize(objective)}`).join('\n')}
+
+            - **Real-World Examples**:
+            ${chapter_about.real_world_examples.map((example, index) => `${index + 1}. ${sanitize(example)}`).join('\n')}
+
+            - **Learning Outcomes**:
+            ${chapter_about.learning_outcomes.map((outcome, index) => `${index + 1}. ${sanitize(outcome)}`).join('\n')}
+
+            - **Key Points**:
+            ${chapter_about.key_points.map((key_point, index) => `${index + 1}. ${sanitize(key_point)}`).join('\n')}
+
+        `;
+
+        const result = await chatSession.sendMessage(prompt);
+        const data = result.response.text();
+        return data;
+    } catch (error) {
+        console.error("Error generating course content:", error.message);
+        console.error("Stack Trace:", error.stack);
+        throw new Error("Failed to generate course content. Please check the input or AI response format.");
+    }
+};
+
+
+
+module.exports = {generateDetailContentForCourseFromAI, generateCourseContentFromAI, generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn }

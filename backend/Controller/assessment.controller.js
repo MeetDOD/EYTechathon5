@@ -65,7 +65,7 @@ const getAssessmentDetailsForAParticularSkill = async (req, res) => {
         const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-       const assessment = await Assessment.findOne({ user: req.user._id });
+        const assessment = await Assessment.findOne({ user: req.user._id });
         if (!assessment) return res.status(404).json({ message: 'Assessment not found' });
 
         const skill = assessment.skillsToDevelop.find(skill => skill.preassessment_skill_id === skill_id);
@@ -82,40 +82,66 @@ const getAssessmentDetailsForAParticularSkill = async (req, res) => {
 const scoreAssessment = async (req, res) => {
     try {
         const { assessmentId } = req.params;
-
-        // Directly destructure if submission is sent as the body
-        const {answers } = req.body;
+        const { answers } = req.body; 
         const userId = req.user._id;
-        console.log(answers);
 
         // Validate user existence
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
+        // Validate assessment existence
         const assessment = await Assessment.findOne({ user: userId });
         if (!assessment) return res.status(404).json({ message: 'Assessment not found' });
 
+        // Find the skill related to this assessment
         const skill = assessment.skillsToDevelop.find(skill => skill.preassessment_skill_id === assessmentId);
         if (!skill) return res.status(404).json({ message: 'Skill not found' });
 
-        // Calculate score
-        const correctAnswers = skill.questions.map(question => question.correctAnswer);
-        console.log(correctAnswers);
-        const score = correctAnswers.reduce((total, correctAnswer, index) => {
-            return correctAnswer === answers[index] ? total + 1 : total;
-        }, 0);
+        // Calculate score and update questions
+        const COIN_REWARD = 5; // Configurable coin reward per correct answer
+        let score = 0;
 
-        // Update user's learning path with the score
+        skill.questions = skill.questions.map(question => {
+            const userAnswer = answers.find(ans => ans.questionId === question._id);
+            const wasAnsweredCorrectly = userAnswer && question.correctAnswer === userAnswer.answer;
+
+            if (wasAnsweredCorrectly) score++; // Increment score for each correct answer
+            return {
+                ...question.toObject(),
+                wasAnsweredCorrectly,
+            };
+        });
+
+        // Update skill status based on score
+        skill.status = score < 5 ? 'Failed' : 'Completed';
+
+        // Calculate total coins earned
+        const totalCoinsEarned = score * COIN_REWARD;
         skill.score = score;
 
+        // Update the assessment and user
+        user.coins += totalCoinsEarned;
         await assessment.save();
+        await user.save();
 
-        return res.status(200).json({ message: 'Assessment scored successfully', data: { score } });
+        return res.status(200).json({ 
+            message: 'Assessment scored successfully', 
+            data: { score, coinsEarned: totalCoinsEarned } 
+        });
     } catch (error) {
-        console.error('Error submitting assessment:', error);
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Error scoring assessment:', {
+            userId: req.user._id,
+            assessmentId: req.params.assessmentId,
+            error: error.message,
+        });
+        return res.status(500).json({ 
+            message: 'Internal server error', 
+            error: error.message 
+        });
     }
 };
+
+
 
 
 module.exports = {

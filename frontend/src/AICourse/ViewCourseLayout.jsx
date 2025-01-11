@@ -21,6 +21,21 @@ const ViewCourseLayout = () => {
     const navigate = useNavigate();
     const [isEnrolled, setIsEnrolled] = useState(false);
 
+    const convertMinutesToHoursCompact = (minutes) => {
+        if (typeof minutes !== 'number' || minutes < 0) {
+            throw new Error('Invalid input: minutes must be a non-negative number');
+        }
+    
+        const hours = Math.floor(minutes / 60); 
+        const remainingMinutes = minutes % 60; 
+    
+        const hoursPart = hours > 0 ? `${hours}h` : ''; 
+        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes}m` : '';
+    
+        return `${hoursPart} ${minutesPart}`.trim(); 
+    };
+    
+
     useEffect(() => {
         const fetchCourse = async () => {
             try {
@@ -236,7 +251,7 @@ const ViewCourseLayout = () => {
                                     </div>
                                     <div>
                                         <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Course Duration</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.duration}12 Hours</p>
+                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{convertMinutesToHoursCompact(parseInt(course?.duration))}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-row items-center gap-4 text-start justify-center">
@@ -267,7 +282,7 @@ const ViewCourseLayout = () => {
                                         <div className="p-1.5 rounded-md bg-primary">
                                             <AiOutlineFieldTime className="text-white" size={20} />
                                         </div>
-                                        <span><strong>Duration:</strong> {chapter.duration} 3 Hours</span>
+                                        <span><strong>Duration:</strong> {convertMinutesToHoursCompact(parseInt(chapter?.duration))}</span>
                                     </div>
                                 </CardContent>
                             </Card>
