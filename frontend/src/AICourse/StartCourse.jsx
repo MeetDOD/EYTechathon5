@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FaClock, FaHome } from 'react-icons/fa';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -66,7 +66,6 @@ const StartCourse = () => {
                 }
             } catch (error) {
                 console.error('Error fetching course:', error);
-                toast.error('Failed to load course. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -131,10 +130,9 @@ const StartCourse = () => {
                     }
                 }
             );
-            toast.success("Your course progress updated");
+            toast.success("Your course progress has been updated");
         } catch (error) {
             console.error('Error updating progress:', error);
-            toast.error("Failed to update progress.");
         }
     };
 
@@ -182,8 +180,7 @@ const StartCourse = () => {
                         {contents.map((content, idx) => (
                             <li
                                 key={idx}
-                                onClick={() => handleNavigation(idx)}
-                                className={`px-3 py-2 rounded-lg cursor-pointer ${activeChapterIndex === idx
+                                className={`px-3 py-2 rounded-lg ${activeChapterIndex === idx
                                     ? 'bg-purple-100 text-black font-semibold'
                                     : ''
                                     }`}>
@@ -204,12 +201,13 @@ const StartCourse = () => {
                 <div className="flex-1 overflow-y-auto lg:mt-0 mt-4">
                     <Card className="shadow-md border rounded-xl border-gray-300" style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)`, borderColor: `var(--borderColor)` }}>
                         <CardHeader>
-                            <CardTitle className="text-2xl font-bold">{activeChapter?.title}</CardTitle>
-                            <CardDescription className="text-lg text-justify font-semibold">{activeChapter?.explanation}</CardDescription>
+                            <CardTitle className="text-2xl font-bold mb-2">{activeChapter?.title}</CardTitle>
+                            <div className="text-lg text-justify font-medium courseSection p-4 rounded-xl">{activeChapter?.description}</div>
                         </CardHeader>
                         <CardContent>
                             {activeChapter?.videoId && (
                                 <div className="mb-6">
+                                    <h2 className="text-2xl mb-3 font-bold">Video <span className='text-primary'>Explanation</span></h2>
                                     <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                                         <iframe
                                             className="absolute top-0 left-0 w-full h-full rounded-xl"
@@ -221,54 +219,54 @@ const StartCourse = () => {
                                     </div>
                                 </div>
                             )}
-
-                            <h2 className="text-xl mb-5 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
-
-                            <div className="mb-8 text-gray-300 text-justify">
-                                <ReactMarkdown>{activeChapter?.detailed_content}</ReactMarkdown>
+                            <div className='mb-8'>
+                                <h2 className="text-2xl mb-3 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
+                                <div className="text-lg text-justify font-medium courseSection p-4 rounded-xl">{activeChapter?.description}{activeChapter?.description}</div>
                             </div>
 
-                            {/* Objectives Section */}
                             <div className="mb-8">
-                                <h3 className="text-xl font-bold text-gray-200 mb-3">Objectives</h3>
+                                <h3 className="text-2xl font-bold mb-3">Chapter <span className='text-primary'>Objectives</span></h3>
                                 <ul className="list-disc pl-6 space-y-2">
                                     {activeChapter?.objectives.map((objective, idx) => (
-                                        <li key={idx} className="text-gray-300">{objective}</li>
+                                        <li key={idx} className="text-lg font-medium">{objective}</li>
                                     ))}
                                 </ul>
                             </div>
 
-                            {/* Real World Examples Section */}
+                            <hr className='border-primary border my-7' />
+
                             <div className="mb-8">
-                                <h3 className="text-xl font-bold text-gray-200 mb-3">Real-World Examples</h3>
-                                <ul className="list-decimal pl-6 space-y-2">
+                                <h3 className="text-2xl font-bold mb-3">Real World <span className='text-primary'>Examples</span></h3>
+                                <ul className="list-disc pl-6 space-y-2">
                                     {activeChapter?.real_world_examples.map((example, idx) => (
-                                        <li key={idx} className="text-gray-300">{example}</li>
+                                        <li key={idx} className="text-lg font-medium">{example}</li>
                                     ))}
                                 </ul>
                             </div>
 
-                            {/* Learning Outcomes Section */}
+                            <hr className='border-primary border my-7' />
+
                             <div className="mb-8">
-                                <h3 className="text-xl font-bold text-gray-200 mb-3">Learning Outcomes</h3>
-                                <ul className="list-inside space-y-2">
+                                <h3 className="text-2xl font-bold mb-3">Learning <span className='text-primary'>Outcomes</span></h3>
+                                <ul className="list-disc pl-6 space-y-2">
                                     {activeChapter?.learning_outcomes.map((outcome, idx) => (
-                                        <li key={idx} className="text-gray-300">{outcome}</li>
+                                        <li key={idx} className="text-lg font-medium">{outcome}</li>
                                     ))}
                                 </ul>
                             </div>
 
-                            {/* Key Points Section */}
+                            <hr className='border-primary border my-7' />
+
                             <div className="mb-8">
-                                <h3 className="text-xl font-bold text-gray-200 mb-3">Key Points</h3>
-                                <ul className="list-inside space-y-2">
+                                <h3 className="text-2xl font-bold mb-3">Key <span className='text-primary'>Points</span></h3>
+                                <ul className="list-disc pl-6 space-y-2">
                                     {activeChapter?.key_points.map((point, idx) => (
-                                        <li key={idx} className="text-gray-300">{point}</li>
+                                        <li key={idx} className="text-lg font-medium">{point}</li>
                                     ))}
                                 </ul>
                             </div>
 
-                            <div className='flex flex-row gap-2 justify-between mt-5'>
+                            <div className='flex flex-row gap-2 justify-between mt-10'>
                                 <Button
                                     variant="secondary"
                                     size="sm"
@@ -284,7 +282,9 @@ const StartCourse = () => {
                                     className="flex gap-2 px-5"
                                 >
                                     {activeChapterIndex === contents.length - 1
-                                        ? <span className='flex gap-2' onClick={() => startAssessment()}>Finish <GiPartyPopper size={20} /></span>
+                                        ? <span className='flex gap-2'
+                                            onClick={() => startAssessment()}
+                                        >Finish <GiPartyPopper size={20} /></span>
                                         : <span className='flex gap-2 items-center'>Next<IoMdArrowRoundForward size={20} /></span>
                                     }
                                 </Button>
