@@ -71,7 +71,7 @@ const App = () => {
                 <LearningPath />
               </AuthenticatedRoute>
             } />
-            <Route path='/assessment' element={
+            <Route path='/assessment/:assessmentid' element={
               <AuthenticatedRoute>
                 <DetailAssessment />
               </AuthenticatedRoute>

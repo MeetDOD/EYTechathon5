@@ -59,7 +59,9 @@ const getCourseContents = async (req, res) => {
             forCourseName: course.courseName,
             data: courseContents.content,
             progress: course.progress,
-            activeChapterIndex: course.activeChapterIndex
+            activeChapterIndex: course.activeChapterIndex,
+            for_skill: course.for_skill
+
         });
         
     }catch(error){

@@ -15,6 +15,7 @@ const StartCourse = () => {
     const [contents, setContents] = useState(null);
     const [loading, setLoading] = useState(true);
     const [courseName, setCourseName] = useState("");
+    const [assessmentId, setAssessmentId] = useState("");
     const [activeChapterIndex, setActiveChapterIndex] = useState(0);
     const [showConfetti, setShowConfetti] = useState(false);
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -45,10 +46,11 @@ const StartCourse = () => {
                     }
                 });
 
-                const { data, activeChapterIndex: fetchedActiveIndex, forCourseName } = response.data;
+                const { data, activeChapterIndex: fetchedActiveIndex, forCourseName, for_skill } = response.data;
 
                 setContents(data);
                 setCourseName(forCourseName);
+                setAssessmentId(for_skill);
 
                 // Retrieve saved index from localStorage
                 const savedIndex = parseInt(localStorage.getItem(`progress_${id}`), 10);
@@ -104,7 +106,6 @@ const StartCourse = () => {
             window.scrollTo(0, 0);
             setTimeout(() => {
                 setShowConfetti(false);
-                navigate("/mycourses");
             }, 5000);
         } catch (error) {
             console.error('Error updating progress to 100%:', error);
@@ -159,6 +160,10 @@ const StartCourse = () => {
     }
 
     const activeChapter = contents[activeChapterIndex];
+
+    const startAssessment = () => {
+        navigate(`/assessment/${assessmentId}`);
+    }
 
     return (
         <div>
@@ -274,7 +279,7 @@ const StartCourse = () => {
                                     className="flex gap-2 px-5"
                                 >
                                     {activeChapterIndex === contents.length - 1
-                                        ? <span className='flex gap-2'>Finish <GiPartyPopper size={20} /></span>
+                                        ? <span className='flex gap-2' onClick={() => startAssessment()}>Finish <GiPartyPopper size={20} /></span>
                                         : <span className='flex gap-2 items-center'>Next<IoMdArrowRoundForward size={20} /></span>
                                     }
                                 </Button>

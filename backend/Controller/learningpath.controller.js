@@ -74,6 +74,7 @@ const generateLearningPathContent = async (req,res) => {
             console.log(skill.chapters);
             return {
                 name: skill.name,
+                skillId: skill.preassesment_skill_id,
                 chapters: skill.chapters,
             }
         });
@@ -93,7 +94,7 @@ const generateLearningPathContent = async (req,res) => {
                 courseLevel: response.courseLevel,
                 language: response.language,
                 topic: response.topic,
-                for_skill: x.name,
+                for_skill: x.skillId,
                 thumbnail: thumbnailPic,
                 description: response.description,
             });

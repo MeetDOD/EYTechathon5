@@ -167,6 +167,7 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
             console.log(skill.chapters);
             return {
                 name: skill.name,
+                skillId: skill.preassesment_skill_id,
                 chapters: skill.chapters,
             }
         });
@@ -189,7 +190,7 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
                 courseLevel: response.courseLevel,
                 language: response.language,
                 topic: response.topic,
-                for_skill: x.name,
+                for_skill: x.skillId,
                 thumbnail: thumbnailPic,
                 description: response.description,
             });
@@ -332,9 +333,9 @@ const workFlowContentGenFn = async (req, res) => {
         console.log(`Generating workFlow content for user: ${userId}`);
 
         // Sequential execution of the steps
-        // await workFlowSkillsRecommended(userId);
-        // await workFlowLearningPath(userId);
-        // await workflowCreateAllQuizzes(userId);
+        await workFlowSkillsRecommended(userId);
+        await workFlowLearningPath(userId);
+        await workflowCreateAllQuizzes(userId);
         await workFlowGenerateLearningPathContent(userId);
         await getARelevantYtVideoForCourseContent(userId);
 
