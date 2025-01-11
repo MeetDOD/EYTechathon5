@@ -18,11 +18,9 @@ const CoursesPage = () => {
         const fetchCourses = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/courses/all-courses`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-                });
-                console.log(response.data.data)
-                setCourses(response.data.data);
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/getallcourses`);
+                const { courses: fetchedCourses } = response.data;
+                setCourses(fetchedCourses);
             } catch (err) {
                 toast.error("Failed to fetch courses");
             } finally {
@@ -50,19 +48,18 @@ const CoursesPage = () => {
     return (
         <div>
             <div className='flex flex-col items-center gap-2 my-10 px-4'>
-                <div className="text-center mb-12">
+                <div className="text-center">
                     <h2 className="text-3xl font-extrabold sm:text-4xl">
                         Latest <span className='text-primary'>Courses</span>
                     </h2>
-                    <p className="mt-4 text-lg font-medium text-gray-500">
+                    <p className="mt-2 text-lg font-medium text-gray-500">
                         Explore our newest courses designed to help you gain essential skills and advance your career
-
                     </p>
                 </div>
             </div>
-            {loading ?
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {Array.from({ length: 8 }).map((index) => (
+            {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {Array.from({ length: 8 }).map((_, index) => (
                         <div
                             key={index}
                             className="p-2 shadow-md rounded-lg border border-gray-300"
@@ -70,13 +67,8 @@ const CoursesPage = () => {
                         >
                             <Skeleton className="w-full h-40 rounded-lg skle" />
                             <div className="py-4 space-y-2">
-                                <div>
-                                    <Skeleton className="h-6 w-3/4 mb-2 skle" />
-                                </div>
-                                <div className='flex justify-between'>
-                                    <Skeleton className="h-4 w-1/2 skle" />
-                                    <Skeleton className="h-4 w-16 skle" />
-                                </div>
+                                <Skeleton className="h-6 w-3/4 mb-2 skle" />
+                                <Skeleton className="h-4 w-1/2 skle" />
                                 <Skeleton className="h-3 w-full skle" />
                                 <Skeleton className="h-3 w-24 skle" />
                                 <Skeleton className="h-3 w-60 skle" />
@@ -85,32 +77,31 @@ const CoursesPage = () => {
                         </div>
                     ))}
                 </div>
-                :
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {paginatedCourses?.map((course) => (
                         <div
                             key={course._id}
-                            to={`/viewcourse/${course._id}`}
                             className="p-2 shadow-md rounded-lg overflow-hidden border border-gray-300 transition duration-300 hover:-translate-y-2"
                             style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)` }}
                         >
                             <img
-                                src={course.thumbnail || "https://preview.redd.it/vkg7a1nlxvl61.png?auto=webp&s=924f9cce333b1f436e056bd6ee0b73da5a907bb7"}
+                                src={course.thumbnail}
                                 alt={course.courseName}
                                 className="w-full rounded-lg h-40 object-cover"
                             />
                             <div className="py-4 space-y-2">
                                 <div className="text-lg font-bold line-clamp-2">
-                                    CareerInsight: {course.courseName}
+                                    {course.courseName}
                                 </div>
                                 <div className='flex justify-between'>
-                                    <div className='text-[10px] p-1 bg-blue-100 rounded-full px-2 text-primary'>
+                                    <span className='text-[10px] p-1 bg-blue-100 rounded-full px-2 text-primary'>
                                         {course.category}
-                                    </div>
-                                    <div className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
+                                    </span>
+                                    <span className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
                                         <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                        {course.duration}
-                                    </div>
+                                        {course.duration || 'N/A'}
+                                    </span>
                                 </div>
                                 <div className="text-xs font-semibold text-gray-500">
                                     Published At: {format(new Date(course.createdAt), 'MMMM d, yyyy')}
@@ -124,34 +115,37 @@ const CoursesPage = () => {
                         </div>
                     ))}
                 </div>
+            )
             }
 
-            {courses?.length > 8 &&
-                <div className="flex justify-center items-center mt-6 gap-2">
-                    <Button
-                        onClick={() => handlePageClick(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        Previous
-                    </Button>
-                    {Array.from({ length: totalPages }).map((_, index) => (
+            {
+                courses?.length > itemsPerPage && (
+                    <div className="flex justify-center items-center mt-6 gap-2">
                         <Button
-                            key={index}
-                            onClick={() => handlePageClick(index + 1)}
-                            className={`px-4 py-2 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : ''}`}
+                            onClick={() => handlePageClick(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            {index + 1}
+                            Previous
                         </Button>
-                    ))}
-                    <Button
-                        onClick={() => handlePageClick(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        Next
-                    </Button>
-                </div>
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                            <Button
+                                key={index}
+                                onClick={() => handlePageClick(index + 1)}
+                                className={`px-4 py-2 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : ''}`}
+                            >
+                                {index + 1}
+                            </Button>
+                        ))}
+                        <Button
+                            onClick={() => handlePageClick(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                )
             }
         </div>
     );
