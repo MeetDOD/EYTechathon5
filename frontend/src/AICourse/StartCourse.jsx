@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Loader from '@/services/Loader';
 import { GiPartyPopper } from "react-icons/gi";
 import Confetti from 'react-confetti';
+import ReactMarkdown from 'react-markdown';
 
 const StartCourse = () => {
     const { id } = useParams();
@@ -222,6 +223,10 @@ const StartCourse = () => {
                             )}
 
                             <h2 className="text-xl mb-5 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
+
+                            <div className="mb-8 text-gray-300 text-justify">
+                                <ReactMarkdown>{activeChapter?.detailed_content}</ReactMarkdown>
+                            </div>
 
                             {/* Objectives Section */}
                             <div className="mb-8">

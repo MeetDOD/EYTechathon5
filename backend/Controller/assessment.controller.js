@@ -85,8 +85,6 @@ const scoreAssessment = async (req, res) => {
         const { answers } = req.body; 
         const userId = req.user._id;
 
-        console.log(answers);
-
         // Validate user existence
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
@@ -100,46 +98,49 @@ const scoreAssessment = async (req, res) => {
         if (!skill) return res.status(404).json({ message: 'Skill not found' });
 
         // Calculate score and update questions
-        const correctAnswers = skill.questions.map(question => question.correctAnswer);
-        console.log(correctAnswers);
+        const COIN_REWARD = 5; // Configurable coin reward per correct answer
+        let score = 0;
 
-        skill.questions = skill.questions.map((question, index) => {
-            const wasAnsweredCorrectly = question.correctAnswer === answers[index];
+        skill.questions = skill.questions.map(question => {
+            const userAnswer = answers.find(ans => ans.questionId === question._id);
+            const wasAnsweredCorrectly = userAnswer && question.correctAnswer === userAnswer.answer;
+
+            if (wasAnsweredCorrectly) score++; // Increment score for each correct answer
             return {
-                ...question.toObject(), // Spread existing question fields to ensure no data loss
+                ...question.toObject(),
                 wasAnsweredCorrectly,
             };
         });
 
-        const totalCoinsEarned = skill.questions.reduce((total, question) => {
-            return question.wasAnsweredCorrectly ? total + 1*5 : total;
-        }, 0);
+        // Update skill status based on score
+        skill.status = score < 5 ? 'Failed' : 'Completed';
 
-        // Calculate the new score based on updated questions
-        const score = skill.questions.reduce((total, question) => {
-            return question.wasAnsweredCorrectly ? total + 1 : total;
-        }, 0);
-
-        // Update the skill with the new score
+        // Calculate total coins earned
+        const totalCoinsEarned = score * COIN_REWARD;
         skill.score = score;
 
-        // Save the updated assessment
+        // Update the assessment and user
         user.coins += totalCoinsEarned;
         await assessment.save();
         await user.save();
 
         return res.status(200).json({ 
             message: 'Assessment scored successfully', 
-            data: { score } 
+            data: { score, coinsEarned: totalCoinsEarned } 
         });
     } catch (error) {
-        console.error('Error scoring assessment:', error);
+        console.error('Error scoring assessment:', {
+            userId: req.user._id,
+            assessmentId: req.params.assessmentId,
+            error: error.message,
+        });
         return res.status(500).json({ 
             message: 'Internal server error', 
             error: error.message 
         });
     }
 };
+
 
 
 

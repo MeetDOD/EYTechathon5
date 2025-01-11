@@ -4,8 +4,38 @@ const { Preassessment } = require("../Models/preassessment.model");
 const { User } = require("../Models/user.model");
 const { Course, Content } = require("../Models/usercourse.model");
 const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
-const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn } = require("./ai.controller");
+const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn, generateDetailContentForCourseFromAI } = require("./ai.controller");
 require("dotenv").config();
+
+
+const addRandomDurationToCourseContent = async () => {
+    try{
+        const contents = await Content.find();
+        for(const content of contents){
+            content.duration = Math.floor(Math.random() * 41) + 10;
+            await content.save();
+        }
+    }catch(error){
+        console.log(error);
+    }
+};
+
+const courseDuration = async () => {
+    try{
+        const course = await Course.find().populate("content");
+        console.log(course.length);
+        for(const x of course){
+            let duration = 0;
+            for(const y of x.content){
+                duration += parseInt(y.duration);
+            }
+            x.duration = duration.toString();
+            await x.save();
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
 
 const workFlowSkillsRecommended = async (user_id, io) => {
     try {
@@ -333,7 +363,9 @@ const workFlowContentGenFn = async (req, res) => {
         await workflowCreateAllQuizzes(userId, io);
         await workFlowGenerateLearningPathContent(userId, io);
         await getARelevantYtVideoForCourseContent(userId, io);
-
+        await generateDetailContentForCourseFromAI(userId);
+        await addRandomDurationToCourseContent();
+        await courseDuration();
         doesUserExist.contentGenerated = true;
         await doesUserExist.save();
 

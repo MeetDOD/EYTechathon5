@@ -15,6 +15,8 @@ const workflowRoutes = require('./Routes/workflow.route');
 const { Server } = require("socket.io");
 const fileUpload = require('express-fileupload');
 const { cloudnairyconnect } = require("./Config/cloudinary");
+const { addChaptersInDepthExplanation } = require('./Controller/learningpath.controller');
+const { Content, Course } = require('./Models/usercourse.model');
 require('dotenv').config();
 
 const port = process.env.PORT || 4000;
@@ -66,9 +68,13 @@ const startServer = async () => {
         });
     });
 
+    
+
     // Attach `io` to app for global access
     app.set('socketio', io);
 }
+
+
 
 startServer();
 
