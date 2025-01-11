@@ -26,7 +26,6 @@ const ViewCourseLayout = () => {
             try {
                 const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/getcourse/${id}`);
                 setCourse(response.data.course);
-
                 if (isLoggedIn) {
                     const enrolledResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/enrolled`, {
                         headers: {
@@ -144,7 +143,10 @@ const ViewCourseLayout = () => {
                 </div>
                 :
                 <div>
-                    <div className="relative shadow-lg bg-gradient-to-r from-indigo-500 to-purple-950 text-white rounded-xl">
+                    <div className="relative shadow-lg bg-cover bg-center text-white rounded-xl"
+                        style={{
+                            backgroundImage: `url('https://static.canva.com/web/images/e733916c4616f5baa19098cc2844369b.jpg')`,
+                        }}>
                         <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="flex items-center justify-center">
                                 <img
@@ -234,7 +236,7 @@ const ViewCourseLayout = () => {
                                     </div>
                                     <div>
                                         <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Course Duration</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.duration}</p>
+                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.duration}12 Hours</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-row items-center gap-4 text-start justify-center">
@@ -243,7 +245,7 @@ const ViewCourseLayout = () => {
                                     </div>
                                     <div>
                                         <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Language</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.language}</p>
+                                        <p className="text-md sm:text-sm md:text-lg lg:text-xl font-bold">English / Hindi</p>
                                     </div>
                                 </div>
                             </div>
@@ -252,20 +254,20 @@ const ViewCourseLayout = () => {
 
 
                     <div className="space-y-6">
-                        {course.chapters?.map((chapter, index) => (
+                        {course.content?.map((chapter, index) => (
                             <Card key={index} className="border-l-4 border-primary shadow-md" style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}>
                                 <CardHeader>
                                     <CardTitle className="text-xl font-semibold">
-                                        {`Chapter ${index + 1}: ${chapter.title}`}
+                                        {chapter.title}
                                     </CardTitle>
-                                    <CardDescription className="mt-1 font-semibold">{chapter.explanation}</CardDescription>
+                                    <div className="text-gray-500 mt-1 font-semibold">{chapter.description}</div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex items-center gap-2">
                                         <div className="p-1.5 rounded-md bg-primary">
                                             <AiOutlineFieldTime className="text-white" size={20} />
                                         </div>
-                                        <span><strong>Duration:</strong> {chapter.duration}</span>
+                                        <span><strong>Duration:</strong> {chapter.duration} 3 Hours</span>
                                     </div>
                                 </CardContent>
                             </Card>
