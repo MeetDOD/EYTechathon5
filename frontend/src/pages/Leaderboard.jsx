@@ -2,11 +2,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { GiTrophyCup } from 'react-icons/gi';
+import Confetti from 'react-confetti';
 
 const Leaderboard = () => {
 
     const [loading, setLoading] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+
+    const poperSizeDetect = () => {
+        const width = document.documentElement.clientWidth;
+        const height = window.innerHeight;
+        setWindowSize({ width, height });
+    };
+
+    useEffect(() => {
+        window.addEventListener('resize', poperSizeDetect);
+        poperSizeDetect();
+        return () => {
+            window.removeEventListener('resize', poperSizeDetect);
+        }
+    }, [windowSize]);
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
@@ -14,7 +31,6 @@ const Leaderboard = () => {
             try {
                 const { data } = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/user/leaderboard`);
                 setLeaderboard(data.users);
-                console.log(data.users);
             } catch (error) {
                 console.error('Error fetching leaderboard data:', error);
             } finally {
@@ -22,11 +38,17 @@ const Leaderboard = () => {
             }
         };
 
+        setShowConfetti(true);
+        setTimeout(() => {
+            setShowConfetti(false);
+        }, 5000);
+
         fetchLeaderboard();
     }, []);
 
     return (
         <div>
+            {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
             <div>
                 <div className="min-h-screen">
                     <div className="p-3">

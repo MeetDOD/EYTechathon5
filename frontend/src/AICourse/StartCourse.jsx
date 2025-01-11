@@ -22,6 +22,20 @@ const StartCourse = () => {
     const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
     const navigate = useNavigate();
 
+    const poperSizeDetect = () => {
+        const width = document.documentElement.clientWidth;
+        const height = window.innerHeight;
+        setWindowSize({ width, height });
+    };
+
+    useEffect(() => {
+        window.addEventListener('resize', poperSizeDetect);
+        poperSizeDetect();
+        return () => {
+            window.removeEventListener('resize', poperSizeDetect);
+        }
+    }, [windowSize]);
+
     // Window resize handler
     useEffect(() => {
         const handleResize = () => {
@@ -101,15 +115,14 @@ const StartCourse = () => {
                 }
             );
             localStorage.setItem(`progress_${id}`, totalChapters - 1);
-            toast.success("Congratulations! You've completed the course.");
             setShowConfetti(true);
             window.scrollTo(0, 0);
             setTimeout(() => {
                 setShowConfetti(false);
+                navigate(`/assessment/${assessmentId}`);
             }, 5000);
         } catch (error) {
             console.error('Error updating progress to 100%:', error);
-            toast.error("Failed to update progress. Please try again.");
         }
     };
 
@@ -139,6 +152,7 @@ const StartCourse = () => {
     // Handle button click for Next/Finish
     const handleNextOrFinish = () => {
         if (activeChapterIndex === contents.length - 1) {
+            toast.success("Congratulations! You've completed the course");
             handleFinish();
         } else {
             handleNavigation(activeChapterIndex + 1);
@@ -173,10 +187,6 @@ const StartCourse = () => {
     }
 
     const activeChapter = contents[activeChapterIndex];
-
-    const startAssessment = () => {
-        navigate(`/assessment/${assessmentId}`);
-    }
 
     return (
         <div>
@@ -297,7 +307,7 @@ const StartCourse = () => {
                                 >
                                     {activeChapterIndex === contents.length - 1
                                         ? <span className='flex gap-2'
-                                            onClick={() => startAssessment()}
+                                            onClick={() => handleFinish()}
                                         >Finish <GiPartyPopper size={20} /></span>
                                         : <span className='flex gap-2 items-center'>Next<IoMdArrowRoundForward size={20} /></span>
                                     }
