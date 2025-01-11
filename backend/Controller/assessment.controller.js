@@ -65,7 +65,7 @@ const getAssessmentDetailsForAParticularSkill = async (req, res) => {
         const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-       const assessment = await Assessment.findOne({ user: req.user._id });
+        const assessment = await Assessment.findOne({ user: req.user._id });
         if (!assessment) return res.status(404).json({ message: 'Assessment not found' });
 
         const skill = assessment.skillsToDevelop.find(skill => skill.preassessment_skill_id === skill_id);
@@ -82,40 +82,65 @@ const getAssessmentDetailsForAParticularSkill = async (req, res) => {
 const scoreAssessment = async (req, res) => {
     try {
         const { assessmentId } = req.params;
-
-        // Directly destructure if submission is sent as the body
-        const {answers } = req.body;
+        const { answers } = req.body; 
         const userId = req.user._id;
+
         console.log(answers);
 
         // Validate user existence
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
+        // Validate assessment existence
         const assessment = await Assessment.findOne({ user: userId });
         if (!assessment) return res.status(404).json({ message: 'Assessment not found' });
 
+        // Find the skill related to this assessment
         const skill = assessment.skillsToDevelop.find(skill => skill.preassessment_skill_id === assessmentId);
         if (!skill) return res.status(404).json({ message: 'Skill not found' });
 
-        // Calculate score
+        // Calculate score and update questions
         const correctAnswers = skill.questions.map(question => question.correctAnswer);
         console.log(correctAnswers);
-        const score = correctAnswers.reduce((total, correctAnswer, index) => {
-            return correctAnswer === answers[index] ? total + 1 : total;
+
+        skill.questions = skill.questions.map((question, index) => {
+            const wasAnsweredCorrectly = question.correctAnswer === answers[index];
+            return {
+                ...question.toObject(), // Spread existing question fields to ensure no data loss
+                wasAnsweredCorrectly,
+            };
+        });
+
+        const totalCoinsEarned = skill.questions.reduce((total, question) => {
+            return question.wasAnsweredCorrectly ? total + 1*5 : total;
         }, 0);
 
-        // Update user's learning path with the score
+        // Calculate the new score based on updated questions
+        const score = skill.questions.reduce((total, question) => {
+            return question.wasAnsweredCorrectly ? total + 1 : total;
+        }, 0);
+
+        // Update the skill with the new score
         skill.score = score;
 
+        // Save the updated assessment
+        user.coins += totalCoinsEarned;
         await assessment.save();
+        await user.save();
 
-        return res.status(200).json({ message: 'Assessment scored successfully', data: { score } });
+        return res.status(200).json({ 
+            message: 'Assessment scored successfully', 
+            data: { score } 
+        });
     } catch (error) {
-        console.error('Error submitting assessment:', error);
-        return res.status(500).json({ message: 'Internal server error', error: error.message });
+        console.error('Error scoring assessment:', error);
+        return res.status(500).json({ 
+            message: 'Internal server error', 
+            error: error.message 
+        });
     }
 };
+
 
 
 module.exports = {

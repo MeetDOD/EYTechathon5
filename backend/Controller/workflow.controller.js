@@ -7,15 +7,15 @@ const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
 const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn } = require("./ai.controller");
 require("dotenv").config();
 
-const workFlowSkillsRecommended = async (user_id) => {
+const workFlowSkillsRecommended = async (user_id, io) => {
     try {
         const user = await User.findById(user_id);
         if (!user) {
-            return console.log("User not found");
+            return io.to(user_id).emit('log', "User not found");
         }
         const preassessment = await Preassessment.findOne({ user: user_id });
         if (!preassessment) {
-            return console.log("Preassessment not found");
+            return io.to(user_id).emit('log', "Preassessment not found");
         }
         const skillsRecommendation = await getSkillsWhichUserShouldFocusOn(preassessment);
         const allSkills = skillsRecommendation.crucialSkillsAndKnowledgeGaps.map(skill => {
@@ -31,24 +31,21 @@ const workFlowSkillsRecommended = async (user_id) => {
             await preassessment.save();
         }
 
-
-
-        console.log("Skills recommendation generated successfully:", allSkills);
+        io.to(user_id).emit('log', "Skills recommendation generated successfully:" + JSON.stringify(allSkills));
     } catch (error) {
-        console.error("Error generating skills recommendation:", error);
+        io.to(user_id).emit('log', "Error generating skills recommendation: " + error.message);
     }
 }
 
-const workFlowLearningPath = async (user_id) => {
+const workFlowLearningPath = async (user_id, io) => {
     try {
         const preassessment = await Preassessment.findOne({ user: user_id });
         if (!preassessment) {
-            console.log("Preassessment not found");
+            io.to(user_id).emit('log', "Preassessment not found");
             return;
         }
-        console.log("Generating learning path for user:", preassessment.user_profile.career_goal);
+        io.to(user_id).emit('log', "Generating learning path for user: " + preassessment.user_profile.career_goal);
 
-        // Extract skills to focus on
         const skillsToFocus = preassessment.feedback.for_career_goal.skills_to_focus.map((skill) => {
             return {
                 skill: skill.skill,
@@ -56,12 +53,10 @@ const workFlowLearningPath = async (user_id) => {
             }
         });
 
-        console.log("Skills to focus on:", skillsToFocus);
+        io.to(user_id).emit('log', "Skills to focus on:" + JSON.stringify(skillsToFocus));
 
-        // Initialize the learning path array
         const skillBasedLearningPath = [];
 
-        // Loop through each skill and fetch its respective learning path
         for (const skill of skillsToFocus) {
             try {
                 const skillLearningPath = await getRespectiveSkillLearningPathFromAI(
@@ -79,55 +74,50 @@ const workFlowLearningPath = async (user_id) => {
                     preassesment_skill_id: skill._id.toString()
                 });
 
-                console.log(`Learning path generated for skill: ${skill.skill}`);
+                io.to(user_id).emit('log', `Learning path generated for skill: ${skill.skill}`);
             } catch (aiError) {
-                console.error(`Error fetching learning path for skill: ${skill.skill}`, aiError.message);
-                // Optionally handle individual skill fetch errors
+                io.to(user_id).emit('log', `Error fetching learning path for skill: ${skill.skill} - ${aiError.message}`);
             }
         }
 
-        console.log("First item in skillBasedLearningPath:", skillBasedLearningPath[0]);
+        io.to(user_id).emit('log', "First item in skillBasedLearningPath: " + JSON.stringify(skillBasedLearningPath[0]));
 
-        // Save the generated learning path in the database
         const learningPath = await LearningPath.create({
             career_goal: preassessment.user_profile.career_goal,
             user: user_id,
             skills: skillBasedLearningPath,
-
         });
 
-        console.log("Learning path saved successfully:", learningPath._id);
-    } catch (e) {
-        console.log(e)
+        io.to(user_id).emit('log', "Learning path saved successfully: " + learningPath._id);
+    } catch (error) {
+        io.to(user_id).emit('log', "Error generating learning path: " + error.message);
     }
 }
 
-const workflowCreateAllQuizzes = async (user_id) => {
+const workflowCreateAllQuizzes = async (user_id, io) => {
     try {
         const user = await User.findById(user_id);
         if (!user) {
-            console.log("User not found");
-            return
+            io.to(user_id).emit('log', "User not found");
+            return;
         }
 
-        // Validate learning path existence
         const learningPath = await LearningPath.findOne({ user: user_id });
         if (!learningPath) {
-            console.log("Learning path not found");
-            return
+            io.to(user_id).emit('log', "Learning path not found");
+            return;
         }
-        // Prepare data for quiz generation
+
         const skills = learningPath.skills.map(skill => ({
             skill_name: skill.name,
-            skill_id: skill.preassesment_skill_id, // Correct property reference
+            skill_id: skill.preassesment_skill_id,
             exercises: skill.exercises,
         }));
 
-        // Generate quizzes for all skills concurrently
         const quizzes = await Promise.all(
             skills.map(async skill => {
                 const quiz = await generateRespectiveSkillAssessmentFromAI(skill.skill_name, skill.exercises);
-                console.log(`Quiz for ${skill.skill_name} created successfully`);
+                io.to(user_id).emit('log', `Quiz for ${skill.skill_name} created successfully`);
                 return {
                     skill: skill.skill_name,
                     questions: quiz.questions,
@@ -136,13 +126,11 @@ const workflowCreateAllQuizzes = async (user_id) => {
             })
         );
 
-        // Create the assessment document
         const newAssessment = await Assessment.create({
             user: user_id,
             skillsToDevelop: quizzes,
         });
 
-        // Update learning path with assessment references
         learningPath.skills.forEach(skill => {
             const quiz = quizzes.find(q => q.skill === skill.name);
             if (quiz) {
@@ -151,36 +139,39 @@ const workflowCreateAllQuizzes = async (user_id) => {
         });
 
         await learningPath.save();
-
-    } catch (e) {
-        console.log(e)
+        io.to(user_id).emit('log', "Quizzes created and saved successfully");
+    } catch (error) {
+        io.to(user_id).emit('log', "Error creating quizzes: " + error.message);
     }
 }
 
-const workFlowGenerateLearningPathContent = async (user_id) => {
+const workFlowGenerateLearningPathContent = async (user_id, io) => {
     try {
         const user = user_id;
         const doesUserExists = await User.findById(user);
-        if (!doesUserExists) return res.status(404).json({ message: "User not found" });
+        if (!doesUserExists) {
+            io.to(user_id).emit('log', "User not found");
+            return;
+        }
         const learningPath = await LearningPath.findOne({ user: user });
         const extractSpecificSkillsLearningContent = learningPath.skills.map((skill) => {
-            console.log(skill.chapters);
+            io.to(user_id).emit('log', `Processing chapters for skill: ${skill.name}`);
             return {
                 name: skill.name,
                 skillId: skill.preassesment_skill_id,
                 chapters: skill.chapters,
             }
         });
-        console.log(extractSpecificSkillsLearningContent);
+
         const preassessmentData = await Preassessment.findOne({ user: user });
         if (!preassessmentData) {
-            console.log("Preassessment not found");
+            io.to(user_id).emit('log', "Preassessment not found");
             return;
         }
 
-        console.log("Generating CouseContent from GenAI");
+        io.to(user_id).emit('log', "Generating CouseContent from GenAI");
         for (const x of extractSpecificSkillsLearningContent) {
-            console.log(`Generating Course Content for ${x.name}`);
+            io.to(user_id).emit('log', `Generating Course Content for ${x.name}`);
             const response = await generateCourseContentFromAI(x.chapters, preassessmentData, x.name);
             const thumbnailPic = await fetchRelevantImage(response.topic);
             const newCourse = await Course.create({
@@ -212,11 +203,10 @@ const workFlowGenerateLearningPathContent = async (user_id) => {
 
             newCourse.content = newContent.map((content) => content._id);
             await newCourse.save();
-            console.log(`Course Content Generated for ${x.name}`);
+            io.to(user_id).emit('log', `Course Content Generated for ${x.name}`);
         }
-
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        io.to(user_id).emit('log', "Error generating learning path content: " + error.message);
     }
 }
 
@@ -249,18 +239,16 @@ const fetchRelevantVideoId = async (query, description) => {
             const videoTitle = item.snippet.title.toLowerCase();
             const videoDescription = item.snippet.description.toLowerCase();
 
-            // Split the query and description into words
             const queryWords = query.toLowerCase().split(/\s+/);
             const descriptionWords = description.toLowerCase().split(/\s+/);
 
-            // Check if any word from the query or description is present in the video title or description
             const isMatch = queryWords.some(word => videoTitle.includes(word) || videoDescription.includes(word)) ||
                 descriptionWords.some(word => videoTitle.includes(word) || videoDescription.includes(word));
 
             if (isMatch) {
                 console.log(`Found a relevant video: ${item.id.videoId} for query: "${query}"`);
                 bestMatch = item.id.videoId;
-                break; // Stop the loop once we find the first match
+                break;
             }
         }
 
@@ -277,79 +265,85 @@ const fetchRelevantVideoId = async (query, description) => {
     }
 };
 
-
-const getARelevantYtVideoForCourseContent = async (user_id) => {
+const getARelevantYtVideoForCourseContent = async (user_id, io) => {
     try {
-        console.log(`Fetching user with ID: ${user_id}`);
+        io.to(user_id).emit('log', `Fetching user with ID: ${user_id}`);
         const user = await User.findById(user_id);
         if (!user) {
-            console.log(`User not found for ID: ${user_id}`);
+            io.to(user_id).emit('log', `User not found for ID: ${user_id}`);
             return;
         }
 
-        console.log(`Fetching course content for user ID: ${user_id}`);
+        io.to(user_id).emit('log', `Fetching course content for user ID: ${user_id}`);
         const courseContents = await Course.find({ belongs_to: user_id }).populate('content');
         if (!courseContents || courseContents.length === 0) {
-            console.log(`No course content found for user ID: ${user_id}`);
+            io.to(user_id).emit('log', `No course content found for user ID: ${user_id}`);
             return;
         }
 
-        console.log(`Processing course topics for user ID: ${user_id}`);
+        io.to(user_id).emit('log', `Processing course topics for user ID: ${user_id}`);
         for (const course of courseContents) {
             for (const content of course.content) {
                 const topic = content.title;
                 const description = content.description;
-                console.log(`Processing content: "${topic}"`);
+                io.to(user_id).emit('log', `Processing content: "${topic}"`);
 
                 const videoId = await fetchRelevantVideoId(topic, description);
 
                 if (!videoId) {
-                    console.log(`No relevant video found for content: "${topic}"`);
+                    io.to(user_id).emit('log', `No relevant video found for content: "${topic}"`);
                     continue;
                 }
 
                 content.videoId = videoId;
                 await content.save();
-                console.log(`Updated content "${topic}" with video ID: ${videoId}`);
+                io.to(user_id).emit('log', `Updated content "${topic}" with video ID: ${videoId}`);
             }
         }
 
-        console.log(`Completed updating YouTube videos for user ID: ${user_id}`);
-    } catch (e) {
-        console.error(`Error processing YouTube videos for user ID: ${user_id}`, e);
+        io.to(user_id).emit('log', `Completed updating YouTube videos for user ID: ${user_id}`);
+    } catch (error) {
+        io.to(user_id).emit('log', `Error processing YouTube videos for user ID: ${user_id} - ${error.message}`);
     }
 };
 
-
+const alertGenFn = async (req, res) => {
+    try{
+        const io = req.app.get('socketio');
+       io.to(req.user._id).emit('generationComplete', 'Content generation completed successfully');
+    }catch(error){
+        console.error('Error handling request:', error);
+    }
+};
 
 const workFlowContentGenFn = async (req, res) => {
     try {
-        const userId = req.user._id; // Access req.user._id directly
+        const io = req.app.get('socketio');
+        const userId = req.user._id;
         const doesUserExist = await User.findById(userId);
         if (!doesUserExist) {
+            io.to(userId).emit('log', 'User not found');
             return res.status(404).send({ message: 'User not found' });
         }
 
-        console.log(`Generating workFlow content for user: ${userId}`);
+        io.to(userId).emit('log', `Generating workFlow content for user: ${userId}`);
 
-        // Sequential execution of the steps
-        await workFlowSkillsRecommended(userId);
-        await workFlowLearningPath(userId);
-        await workflowCreateAllQuizzes(userId);
-        await workFlowGenerateLearningPathContent(userId);
-        await getARelevantYtVideoForCourseContent(userId);
+        await workFlowSkillsRecommended(userId, io);
+        await workFlowLearningPath(userId, io);
+        await workflowCreateAllQuizzes(userId, io);
+        await workFlowGenerateLearningPathContent(userId, io);
+        await getARelevantYtVideoForCourseContent(userId, io);
 
-        // Update user status and save
         doesUserExist.contentGenerated = true;
         await doesUserExist.save();
 
+        io.to(userId).emit('log', 'WorkFlow content generated successfully');
         res.status(200).send({ message: 'WorkFlow content generated successfully' });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        const io = req.app.get('socketio');
+        io.to(req.user._id).emit('log', 'Error while generating workFlow content: ' + error.message);
         res.status(500).send({ message: 'Error while generating workFlow content' });
     }
 };
 
-
-
-module.exports = { workFlowContentGenFn, getARelevantYtVideoForCourseContent };
+module.exports = { workFlowContentGenFn, alertGenFn,getARelevantYtVideoForCourseContent };

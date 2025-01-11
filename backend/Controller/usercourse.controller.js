@@ -119,6 +119,10 @@ const updateProgress = async (req, res) => {
         courses.activeChapterIndex = activeChapterIndex;
         console.log('courses', courses.topic, "progress", courses.progress);
         await courses.save();
+        if(progress === 100){
+            user.coins += 10;
+            await user.save();
+        }
         res.status(200).json({ 
             message: 'Progress updated successfully', 
             progress: courses.progress,
