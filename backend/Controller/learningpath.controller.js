@@ -3,7 +3,7 @@ const { User } = require("../Models/user.model");
 const {Preassessment}  = require("../Models/preassessment.model");
 const Assessment = require("../Models/assessment.model");
 const {Course, Content} = require("../Models/usercourse.model.js")
-const { generateCourseContentFromAI } = require("./ai.controller");
+const { generateCourseContentFromAI, generateDetailContentForCourseFromAI } = require("./ai.controller");
 const {fetchRelevantImage } = require("../utils/thumbnailGenerator.js");
 
 const getLearningPath = async (req, res) => {
@@ -125,4 +125,29 @@ const generateLearningPathContent = async (req,res) => {
     }
 }
 
-module.exports = { getLearningPath, getRespectiveLearningPath, generateLearningPathContent };
+
+const addChaptersInDepthExplanation = async (user_id) => {
+    try{
+        const user = await User.findById(user_id);
+        if(!user) {
+            console.log("User not found");
+            return;
+        }
+        const course = await Course.find({belongs_to: user_id}).populate("content");
+        if(!course) return res.status(404).json({message: "Course not found"});
+        
+        for(const x of course){
+            for(const y of x.content){
+                console.log(`Generating Detailed Content for ${y.title}`);
+                const response = await generateDetailContentForCourseFromAI(y);
+                y.detailed_content = response;
+                await y.save();
+                console.log(`Detailed Content Generated for ${y.title}`);
+            }
+        }
+    }catch(e){
+        console.log(e);
+    }
+}
+
+module.exports = { addChaptersInDepthExplanation,getLearningPath, getRespectiveLearningPath, generateLearningPathContent };

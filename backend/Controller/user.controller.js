@@ -252,5 +252,15 @@ const getuserbyid = async (req, res) => {
     }
 }
 
-module.exports = { register, verifyOTP, login, updateProfile, getalluser, getuserbyid, adduserdetail };
+const getLeaderBoardDataBasedOnCoins = async (req, res) => {
+    try {
+        const users = await User.find().sort({ coins: -1 }).limit(10);
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error("Error getting leaderboard data:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = {getLeaderBoardDataBasedOnCoins, register, verifyOTP, login, updateProfile, getalluser, getuserbyid, adduserdetail };
 

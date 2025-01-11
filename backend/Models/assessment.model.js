@@ -15,7 +15,7 @@ const assessmentSchema = new mongoose.Schema({
             },
             status: {
                 type: String,
-                enum: ['Not Started', 'In Progress', 'Completed'],
+                enum: ['Failed', 'Not Started', 'In Progress', 'Completed'],
                 default: 'Not Started'
             },
             completionPercentage: {
@@ -39,7 +39,12 @@ const assessmentSchema = new mongoose.Schema({
                     correctAnswer: {
                         type: String,
                         required: true
-                    }
+                    },
+                    wasAnswerdPreviousCorrectly: {
+                        type: Boolean,
+                        default: false
+                    },
+
                 }
             ]
         }

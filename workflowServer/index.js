@@ -38,7 +38,24 @@ app.get('/create', (req, res) => {
             }
         };
 
+        const alertAfterFetchWithRetry = async () => {
+            try{
+                const result = await fetch(`${process.env.WORKFLOW_SERVER}/workflow/alert`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+                const response = await result.json();
+                console.log('Alert response:', response);
+            }catch(error){
+                console.error('Error handling request:', error);
+            }
+        }
+
         fetchWithRetry();
+        alertAfterFetchWithRetry();
     } catch (error) {
         console.error('Error handling request:', error);
     }
