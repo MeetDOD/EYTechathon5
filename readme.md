@@ -4,7 +4,7 @@
 
 ---
 
-# Problem Statement: Education - AI for skill development in youth
+# 🤔 Problem Statement: Education - AI for skill development in youth
 
 ![ey-logo-black](https://github.com/user-attachments/assets/da4793c6-5c40-4ff3-8a1b-f4ad6803f783)
 
