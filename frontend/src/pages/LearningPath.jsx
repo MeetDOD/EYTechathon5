@@ -4,7 +4,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaHome } from 'react-icons/fa';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 const SkeletonLoader = () => (
@@ -35,6 +35,7 @@ const LearningPath = () => {
 
                 setFeedback(response.data.preassessment.feedback.for_career_goal.skills_to_focus || []);
                 setName(response.data.preassessment.feedback.for_career_goal.name);
+                console.log(response.data.preassessment.feedback.for_career_goal.skills_to_focus || [])
             } catch (error) {
                 console.log(error);
                 setLoading(true);

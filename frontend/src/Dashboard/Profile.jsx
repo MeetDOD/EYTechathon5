@@ -35,7 +35,7 @@ const Profile = () => {
                 </div>
 
                 <div className="mt-20 p-6 text-center">
-                    <h1 className="text-4xl font-bold">{user?.fullName} || {"🪙 " + user?.coins || 0}</h1>
+                    <h1 className="text-4xl font-bold">{user?.fullName}</h1>
                     <h2 className="text-lg font-semibold text-gray-500 mt-2">{user?.email} | +91 {user?.phoneno}</h2>
                 </div>
 

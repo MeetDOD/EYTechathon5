@@ -25,16 +25,16 @@ const ViewCourseLayout = () => {
         if (typeof minutes !== 'number' || minutes < 0) {
             throw new Error('Invalid input: minutes must be a non-negative number');
         }
-    
-        const hours = Math.floor(minutes / 60); 
-        const remainingMinutes = minutes % 60; 
-    
-        const hoursPart = hours > 0 ? `${hours}h` : ''; 
-        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes}m` : '';
-    
-        return `${hoursPart} ${minutesPart}`.trim(); 
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+
+        const hoursPart = hours > 0 ? `${hours} hours` : '';
+        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes} minutes` : '';
+
+        return `${hoursPart} ${minutesPart}`.trim();
     };
-    
+
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -224,51 +224,58 @@ const ViewCourseLayout = () => {
                         </div>
                     </div>
 
-                    <div className="py-10">
+                    <div>
+                        <h3 className="text-2xl font-bold pt-5">Course <span className='text-primary'>Key Factors</span></h3>
+                    </div>
+
+                    <div className="pt-5 pb-5">
                         <div className="max-w-7xl mx-auto">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 shadow-md rounded-lg border border-primary border-l-4 border-r-4">
-                                <div className="flex flex-row items-center gap-4 text-start justify-center">
-                                    <div className="p-1.5 rounded-md bg-primary">
-                                        <MdCategory className="text-white" size={35} />
+                            <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6 shadow-md rounded-lg border border-primary border-l-4 border-r-4">
+                                <div className="flex flex-row sm:items-center items-start gap-4 text-start sm:justify-center justify-start">
+                                    <div className="p-2 rounded-md bg-primary">
+                                        <MdCategory className="text-white" size={30} />
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Category</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.category}</p>
+                                        <span className="font-semibold text-xs sm:text-sm md:text-base">Category</span>
+                                        <p className="text-base sm:text-lg md:text-xl font-bold">{course.category}</p>
                                     </div>
                                 </div>
-                                <div className="flex flex-row items-center gap-4 text-start justify-center">
-                                    <div className="p-1.5 rounded-md bg-primary">
-                                        <FaClock className="text-white" size={35} />
+                                <div className="flex flex-row sm:items-center items-start gap-4 text-start sm:justify-center justify-start">
+                                    <div className="p-2 rounded-md bg-primary">
+                                        <FaClock className="text-white" size={30} />
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Course Level</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{course.courseLevel}</p>
+                                        <span className="font-semibold text-xs sm:text-sm md:text-base">Course Level</span>
+                                        <p className="text-base sm:text-lg md:text-xl font-bold">{course.courseLevel}</p>
                                     </div>
                                 </div>
-                                <div className="flex flex-row items-center gap-4 text-start justify-center">
-                                    <div className="p-1.5 rounded-md bg-primary">
-                                        <AiOutlineFieldTime className="text-white" size={35} />
+                                <div className="flex flex-row sm:items-center items-start gap-4 text-start sm:justify-center justify-start">
+                                    <div className="p-2 rounded-md bg-primary">
+                                        <AiOutlineFieldTime className="text-white" size={30} />
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Course Duration</span>
-                                        <p className="text-lg sm:text-sm md:text-lg lg:text-xl font-bold">{convertMinutesToHoursCompact(parseInt(course?.duration))}</p>
+                                        <span className="font-semibold text-xs sm:text-sm md:text-base">Course Duration</span>
+                                        <p className="text-base sm:text-lg md:text-xl font-bold">{convertMinutesToHoursCompact(parseInt(course?.duration))}</p>
                                     </div>
                                 </div>
-                                <div className="flex flex-row items-center gap-4 text-start justify-center">
-                                    <div className="p-1.5 rounded-md bg-primary">
-                                        <FaLanguage className="text-white" size={35} />
+                                <div className="flex flex-row sm:items-center items-start gap-4 text-start sm:justify-center justify-start">
+                                    <div className="p-2 rounded-md bg-primary">
+                                        <FaLanguage className="text-white" size={30} />
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-sm sm:text-xs md:text-sm lg:text-base">Language</span>
-                                        <p className="text-md sm:text-sm md:text-lg lg:text-xl font-bold">English / Hindi</p>
+                                        <span className="font-semibold text-xs sm:text-sm md:text-base">Language</span>
+                                        <p className="text-base sm:text-lg md:text-xl font-bold">English / Hindi</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <div>
+                        <h3 className="text-2xl font-bold">Course includes <span className="text-primary">{course.content.length} chapters</span></h3>
+                    </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-6 pt-5">
                         {course.content?.map((chapter, index) => (
                             <Card key={index} className="border-l-4 border-primary shadow-md" style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}>
                                 <CardHeader>

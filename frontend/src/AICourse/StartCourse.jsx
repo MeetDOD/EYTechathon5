@@ -146,6 +146,20 @@ const StartCourse = () => {
         }
     };
 
+    const convertMinutesToHoursCompact = (minutes) => {
+        if (typeof minutes !== 'number' || minutes < 0) {
+            throw new Error('Invalid input: minutes must be a non-negative number');
+        }
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+
+        const hoursPart = hours > 0 ? `${hours} hours` : '';
+        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes} minutes` : '';
+
+        return `${hoursPart} ${minutesPart}`.trim();
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -190,7 +204,7 @@ const StartCourse = () => {
                                     </div>
                                     <div className='col-span-4'>
                                         <h2 className='font-medium'>{`${content?.title}`}</h2>
-                                        <h2 className="text-sm font-semibold flex gap-2 items-center text-primary py-1"><FaClock />{content?.duration}</h2>
+                                        <h2 className="text-sm font-semibold flex gap-2 items-center text-primary py-1"><FaClock />{convertMinutesToHoursCompact(parseInt(content?.duration)) || 'N/A'}</h2>
                                     </div>
                                 </div>
                             </li>
@@ -221,7 +235,7 @@ const StartCourse = () => {
                             )}
                             <div className='mb-8'>
                                 <h2 className="text-2xl mb-3 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
-                                <div className="text-lg text-justify font-medium courseSection p-4 rounded-xl">{activeChapter?.description}{activeChapter?.description}</div>
+                                <ReactMarkdown className="text-lg text-justify font-medium courseSection p-4 rounded-xl">{activeChapter?.detailed_content}</ReactMarkdown>
                             </div>
 
                             <div className="mb-8">

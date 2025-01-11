@@ -6,17 +6,19 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/ui/themeprovider';
 import { BsFillMoonStarsFill, BsFillSunFill } from 'react-icons/bs';
 import logo from "../assets/logo.png"
-import { loggedInState, tokenState } from '@/store/auth';
+import { loggedInState, tokenState, userState } from '@/store/auth';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
+import coin from "../assets/coin.json";
+import Lottie from 'lottie-react';
 
 const Navbar = () => {
-
     const navigate = useNavigate();
     const [showMenu, setShowMenu] = useState(false);
     const { theme, toggleTheme } = useTheme();
     const isLoggedIn = useRecoilValue(loggedInState);
     const setTokenState = useSetRecoilState(tokenState);
+    const user = useRecoilValue(userState);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -56,18 +58,29 @@ const Navbar = () => {
                     <li className='py-1 hover:bg-primary hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>Contact</li>
                 </NavLink>
             </ul>
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-3'>
                 <Button size="sm" variant="ghost" className="border" onClick={toggleTheme} style={{
                     borderColor: `var(--borderColor)`,
                 }}>
                     {theme === "dark" ? <BsFillMoonStarsFill className="h-5 w-5 text-primary" /> : <BsFillSunFill className="h-5 w-5 text-primary" />}
                 </Button>
                 {isLoggedIn ?
-                    <Link to="/dashboard">
-                        <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden md:block'>
-                            Dashboard
+                    <>
+                        <Button
+                            size="sm"
+                            className="cursor-none bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-500 rounded-full flex items-center px-4 py-2"
+                        >
+                            <Lottie animationData={coin} className="w-14 h-14 -ml-5 -mr-5" />
+                            <span className="ml-1 font-bold text-white">
+                                {user?.coins || 0}
+                            </span>
                         </Button>
-                    </Link>
+                        <Link to="/dashboard">
+                            <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden md:block'>
+                                Dashboard
+                            </Button>
+                        </Link>
+                    </>
                     :
                     <Link to="/login">
                         <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden md:block'>
