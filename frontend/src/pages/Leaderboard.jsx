@@ -118,7 +118,7 @@ const Leaderboard = () => {
                                                                 <GiTrophyCup className={index === 0 ? "text-[#FFD700] text-5xl" : index === 1 ? "text-[#C0C0C0] text-5xl" : "text-[#CD7F32] text-5xl"} />
                                                             </div>
                                                         ) : (
-                                                            user.rank
+                                                            index + 1
                                                         )}
                                                     </td>
                                                     <td className="px-2 py-4 sm:px-6">
