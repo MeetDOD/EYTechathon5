@@ -114,6 +114,10 @@ body {
   border: var(--borderColor);
 }
 
+.vertical-timeline::before {
+  background: #7c3aed !important;
+}
+
 .skle {
   background-color: var(--skle);
 }
