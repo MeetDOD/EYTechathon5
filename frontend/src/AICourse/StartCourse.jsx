@@ -34,7 +34,7 @@ const StartCourse = () => {
         return () => {
             window.removeEventListener('resize', poperSizeDetect);
         }
-    }, [windowSize]);
+    }, []);
 
     // Window resize handler
     useEffect(() => {

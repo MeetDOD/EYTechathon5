@@ -38,6 +38,11 @@ const CourseSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    is_completed: {
+        type: Boolean,
+        default: false,
+        required: false,
+    },
     courseName: { type: String, required: true },
     category: {
         type: String,
