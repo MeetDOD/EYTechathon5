@@ -5,12 +5,70 @@ import { useRecoilValue } from 'recoil';
 import { userState } from '@/store/auth';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
+import coin from "../assets/coin.json";
+import Lottie from 'lottie-react';
+
+const ReportCardDialog = ({ reportData, isOpen, onClose }) => {
+    const navigate = useNavigate();
+
+    const handleClose = () => {
+        onClose();
+        navigate('/mycourses');
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+            <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]" style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)`, scrollY: "auto" }}>
+                <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold">Assessment Report Card</DialogTitle>
+                    <DialogDescription>Review your answers and results below.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4 font-medium text-white bg-primary p-4 rounded-lg">
+                        <span>Question</span>
+                        <span>Your Answer</span>
+                        <span>Correct Answer</span>
+                    </div>
+                    {reportData.wrongAnswers.map((item, index) => (
+                        <div key={index} className="grid grid-cols-3 gap-4 p-2 border-b-2 border-primary">
+                            <span>{item.questionText}</span>
+                            <span
+                                className={`font-semibold ${item.userAnswer === item.correctAnswer
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                    }`}
+                            >
+                                {item.userAnswer || 'Not Answered'}
+                            </span>
+                            <span className="font-semibold text-green-600">{item.correctAnswer}</span>
+                        </div>
+                    ))}
+                    <div className="mt-6 text-center">
+                        <h2 className="text-xl font-bold">Your Score: {reportData.score}</h2>
+                        <div className='flex flex-col'>
+                            <div className="text-lg font-medium text-gray-500">
+                                Coins Earned: 🪙 {reportData.coinsEarned}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-end">
+                    <Button onClick={handleClose}>Close</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 const DetailAssessment = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const user = useRecoilValue(userState);
     const [questions, setQuestions] = useState([]);
     const [userAnswers, setUserAnswers] = useState({});
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [reportData, setReportData] = useState(null);
     const { assessmentid } = useParams();
 
     const nextQuestion = () => {
@@ -43,19 +101,17 @@ const DetailAssessment = () => {
         };
 
         try {
-            console.log(submission);
-            const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/assessment/submit/${assessmentid}`, {
-                method: "POST",
+            const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/assessment/submit/${assessmentid}`, {
+                answers: { answers: userAnswers },
+            }, {
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: JSON.stringify({
-                    answers: submission,
-                }),
             });
-            const data = await res.json();
-            console.log(data);
+
+            setReportData(res.data.data);
+            setIsDialogOpen(true);
+            console.log(res.data.data)
             toast.success("Assessment submitted successfully 🥳");
         } catch (error) {
             console.error(error);
@@ -154,6 +210,13 @@ const DetailAssessment = () => {
                         </div>
                     ))}
                 </div>
+                {reportData && (
+                    <ReportCardDialog
+                        reportData={reportData}
+                        isOpen={isDialogOpen}
+                        onClose={() => setIsDialogOpen(false)}
+                    />
+                )}
             </div>
 
         </div>
