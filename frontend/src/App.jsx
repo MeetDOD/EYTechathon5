@@ -34,6 +34,7 @@ import AddDetailForm from './home/AddDetailForm';
 import DetailAssessment from './Dashboard/DetailAssessment';
 import UserReport from './pages/UserReport';
 import LearningPath from './pages/LearningPath';
+import Leaderboard from './pages/Leaderboard';
 
 const App = () => {
 
@@ -50,6 +51,7 @@ const App = () => {
             <Route path='/viewcourse/:id/careerinsight/:coursename' element={<ViewCourseLayout />} />
             <Route path='/about' element={<AboutUs />} />
             <Route path='/contact' element={<ContactUs />} />
+            <Route path='/leaderboard' element={<Leaderboard />} />
 
             <Route path='/login' element={
               <NonAuthenticatedRoute>

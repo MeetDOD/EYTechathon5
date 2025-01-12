@@ -45,7 +45,7 @@ const MyCourses = () => {
 
         socket.on('generationComplete', () => {
             setLogMessages((prevLogs) => [...prevLogs, "Generation complete!, Refreshing courses..."]);
-            fetchCourses(); 
+            fetchCourses();
         });
 
         // Cleanup on unmount
@@ -89,6 +89,20 @@ const MyCourses = () => {
         currentPage * itemsPerPage
     );
 
+    const convertMinutesToHoursCompact = (minutes) => {
+        if (typeof minutes !== 'number' || minutes < 0) {
+            throw new Error('Invalid input: minutes must be a non-negative number');
+        }
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+
+        const hoursPart = hours > 0 ? `${hours} h` : '';
+        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes} m` : '';
+
+        return `${hoursPart} ${minutesPart}`.trim();
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
         document.title = `CAREERINSIGHT | MY COURSES`;
@@ -120,7 +134,7 @@ const MyCourses = () => {
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem className="hidden md:block font-semibold">
-                                Dashboard {user?._id}
+                                Dashboard
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
@@ -192,7 +206,7 @@ const MyCourses = () => {
                                         </div>
                                         <div className="font-bold text-xs flex flex-row items-center gap-1 text-green-400">
                                             <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                            {course.duration}
+                                            {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'N/A'}
                                         </div>
                                     </div>
                                     <div className="pt-1">

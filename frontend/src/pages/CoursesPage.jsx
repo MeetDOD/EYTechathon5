@@ -18,16 +18,16 @@ const CoursesPage = () => {
         if (typeof minutes !== 'number' || minutes < 0) {
             throw new Error('Invalid input: minutes must be a non-negative number');
         }
-    
-        const hours = Math.floor(minutes / 60); 
-        const remainingMinutes = minutes % 60; 
-    
-        const hoursPart = hours > 0 ? `${hours}h` : ''; 
-        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes}m` : '';
-    
-        return `${hoursPart} ${minutesPart}`.trim(); 
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+
+        const hoursPart = hours > 0 ? `${hours} h` : '';
+        const minutesPart = remainingMinutes > 0 ? `${remainingMinutes} m` : '';
+
+        return `${hoursPart} ${minutesPart}`.trim();
     };
-    
+
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -115,7 +115,7 @@ const CoursesPage = () => {
                                     </span>
                                     <span className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
                                         <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                        {convertMinutesToHoursCompact(parseInt(course?.duration))|| 'N/A'}
+                                        {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'N/A'}
                                     </span>
                                 </div>
                                 <div className="text-xs font-semibold text-gray-500">

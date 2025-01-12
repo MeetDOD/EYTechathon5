@@ -254,7 +254,7 @@ const getuserbyid = async (req, res) => {
 
 const getLeaderBoardDataBasedOnCoins = async (req, res) => {
     try {
-        const users = await User.find().sort({ coins: -1 }).limit(10);
+        const users = await User.find({ coins: { $gte: 1 } }).sort({ coins: -1 }).limit(10);
         res.status(200).json({ users });
     } catch (error) {
         console.error("Error getting leaderboard data:", error);

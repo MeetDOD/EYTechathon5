@@ -205,11 +205,11 @@ const AddDetailForm = () => {
                         </DialogDescription>
                     </DialogHeader>
 
-                        <button className="bg-primary text-white px-4 py-2 rounded-lg" onClick={autofillFormData}>
+                    {/* <button className="bg-primary text-white px-4 py-2 rounded-lg" onClick={autofillFormData}>
                             Autofill Form
-                        </button>
+                        </button> */}
                     <form className='grid gap-6'>
-                    
+
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                             <div className='flex flex-col space-y-2'>
                                 <Label htmlFor='phoneno' className='font-medium'>

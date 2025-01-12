@@ -6,17 +6,19 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/ui/themeprovider';
 import { BsFillMoonStarsFill, BsFillSunFill } from 'react-icons/bs';
 import logo from "../assets/logo.png"
-import { loggedInState, tokenState } from '@/store/auth';
+import { loggedInState, tokenState, userState } from '@/store/auth';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
+import coin from "../assets/coin.json";
+import Lottie from 'lottie-react';
 
 const Navbar = () => {
-
     const navigate = useNavigate();
     const [showMenu, setShowMenu] = useState(false);
     const { theme, toggleTheme } = useTheme();
     const isLoggedIn = useRecoilValue(loggedInState);
     const setTokenState = useSetRecoilState(tokenState);
+    const user = useRecoilValue(userState);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -42,12 +44,15 @@ const Navbar = () => {
     return (
         <div className='flex items-center justify-between text-sm py-4 mb-5 border-b' style={{ borderColor: `var(--borderColor)` }}>
             <img src={logo} className='w-32 cursor-pointer' alt='TECHCARE' onClick={() => navigate("/")} />
-            <ul className='hidden md:flex items-start gap-5 font-medium list-none'>
+            <ul className='hidden lg:flex items-start gap-5 font-medium list-none'>
                 <NavLink to="/">
                     <li className='py-1 hover:bg-primary  hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>Home</li>
                 </NavLink>
                 <NavLink to="/courses">
                     <li className='py-1 hover:bg-primary hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>Courses</li>
+                </NavLink>
+                <NavLink to="/leaderboard">
+                    <li className='py-1 hover:bg-primary hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>Leaderboard</li>
                 </NavLink>
                 <NavLink to="/about">
                     <li className='py-1 hover:bg-primary hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>About</li>
@@ -56,29 +61,40 @@ const Navbar = () => {
                     <li className='py-1 hover:bg-primary hover:text-white px-2 rounded-md hover:-translate-y-1 transition duration-300'>Contact</li>
                 </NavLink>
             </ul>
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-3'>
                 <Button size="sm" variant="ghost" className="border" onClick={toggleTheme} style={{
                     borderColor: `var(--borderColor)`,
                 }}>
                     {theme === "dark" ? <BsFillMoonStarsFill className="h-5 w-5 text-primary" /> : <BsFillSunFill className="h-5 w-5 text-primary" />}
                 </Button>
                 {isLoggedIn ?
-                    <Link to="/dashboard">
-                        <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden md:block'>
-                            Dashboard
+                    <>
+                        <Button
+                            size="sm"
+                            className="cursor-none bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-500 rounded-full flex items-center px-4 py-2"
+                        >
+                            <Lottie animationData={coin} className="w-14 h-14 -ml-5 -mr-5" />
+                            <span className="ml-1 font-bold text-white">
+                                {user?.coins || 0}
+                            </span>
                         </Button>
-                    </Link>
+                        <Link to="/dashboard">
+                            <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden lg:block'>
+                                Dashboard
+                            </Button>
+                        </Link>
+                    </>
                     :
                     <Link to="/login">
-                        <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden md:block'>
+                        <Button size="sm" className='bg-primary hover:bg-primary/90 text-white px-6 rounded-md py-2 font-semibold hidden lg:block'>
                             Login / Signup
                         </Button>
                     </Link>
                 }
 
-                <button onClick={() => setShowMenu(true)} className='w-6 md:hidden'><GiHamburgerMenu size={25} /></button>
+                <button onClick={() => setShowMenu(true)} className='w-6 -ml-4 lg:hidden'><GiHamburgerMenu size={25} /></button>
 
-                <div className={`${showMenu ? 'fixed w-full' : 'h-0 w-0'} md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden transition-all`} style={{ backgroundColor: `var(--background-color)` }} >
+                <div className={`${showMenu ? 'fixed w-full' : 'h-0 w-0'} lg:hidden right-0 top-0 bottom-0 z-20 overflow-hidden transition-all`} style={{ backgroundColor: `var(--background-color)` }} >
                     <div className='flex items-center justify-between px-5 py-6'>
                         <Link to='/'>
                             <img src={logo} onClick={() => setShowMenu(false)} className='w-28 cursor-pointer' alt='TECHCARE' />
