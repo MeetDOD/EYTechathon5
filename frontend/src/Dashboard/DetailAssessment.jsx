@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import AppSidebar from './AppSidebar';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useRecoilValue } from 'recoil';
@@ -102,79 +98,66 @@ const DetailAssessment = () => {
     }, [assessmentid]);
 
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset style={{ backgroundColor: `var(--background-color)` }}>
-                <div className="flex items-center gap-2 mb-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem className="hidden md:block font-semibold">Dashboard</BreadcrumbItem>
-                            <BreadcrumbSeparator className="hidden md:block" />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage className="font-semibold" style={{ color: `var(--text-color)` }}>
-                                    Detail Assessment
-                                </BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
+        <div className="p-4 min-h-screen">
+            <div className="flex justify-between mb-4">
+                <Button
+                    onClick={prevQuestion}
+                    className={`${currentQuestionIndex === 0 ? "cursor-not-allowed" : ""}`}
+                    disabled={currentQuestionIndex === 0}
+                >
+                    Previous
+                </Button>
+                <Button
+                    onClick={
+                        currentQuestionIndex === questions.length - 1
+                            ? handleSubmit
+                            : nextQuestion
+                    }
+                >
+                    {currentQuestionIndex === questions.length - 1 ? "Submit" : "Next"}
+                </Button>
+            </div>
+
+            <div className="mb-4">
+                <div className="text-primary font-extrabold text-lg mb-2">
+                    Question {currentQuestionIndex + 1}/{questions.length}
                 </div>
-                <div className="p-4 min-h-screen">
-                    <div className="flex justify-between mb-4">
-                        <Button
-                            onClick={prevQuestion}
-                            className={`${currentQuestionIndex === 0 ? "cursor-not-allowed" : ""}`}
-                            disabled={currentQuestionIndex === 0}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            onClick={
-                                currentQuestionIndex === questions.length - 1
-                                    ? handleSubmit
-                                    : nextQuestion
-                            }
-                        >
-                            {currentQuestionIndex === questions.length - 1 ? "Submit" : "Next"}
-                        </Button>
-                    </div>
-
-                    <div className="mb-4">
-                        <div className="text-primary font-extrabold text-lg mb-2">
-                            Question {currentQuestionIndex + 1}/{questions.length}
-                        </div>
-                        <div className="bg-gray-200 h-2 w-full rounded">
-                            <div className="bg-primary h-2 rounded" style={{ width: `${progress}%` }}></div>
-                        </div>
-                    </div>
-
-                    <div className="mb-4">
-                        <h2 className="text-2xl font-bold mb-4">
-                            {questions[currentQuestionIndex]?.question}
-                        </h2>
-                        <div className="space-y-2">
-                            {questions[currentQuestionIndex]?.options.map((answer, index) => (
-                                <div
-                                    key={index}
-                                    onClick={() => handleAnswerSelect(answer)} // Pass the actual answer value
-                                    className={`w-full py-4 px-8 text-left text-[15px] font-medium border border-l-8 border-r-8 rounded-full shadow-sm cursor-pointer ${userAnswers[currentQuestionIndex] === answer
-                                            ? "bg-primary text-white border-primary"
-                                            : "border-primary"
-                                        }`}
-                                >
-                                    <span className="rounded-full px-2.5 py-1.5 items-center mr-1 border-primary border-2">
-                                        {String.fromCharCode(65 + index)}
-                                    </span>{" "}
-                                    {answer}
-                                </div>
-                            ))}
-                        </div>
-
-                    </div>
+                <div className="bg-gray-200 h-2 w-full rounded">
+                    <div className="bg-primary h-2 rounded" style={{ width: `${progress}%` }}></div>
                 </div>
-            </SidebarInset>
-        </SidebarProvider>
+            </div>
+
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-6">
+                    {currentQuestionIndex + 1}. {questions[currentQuestionIndex]?.question}
+                </h2>
+                <div className="space-y-4">
+                    {questions[currentQuestionIndex]?.options.map((answer, index) => (
+                        <div
+                            key={index}
+                            onClick={() => handleAnswerSelect(answer)}
+                            className={`w-full py-4 px-6 text-left text-[15px] font-medium rounded-full border border-l-8 border-r-8 border-primary shadow-md cursor-pointer transition-all duration-300 ${userAnswers[currentQuestionIndex] === answer
+                                ? "bg-primary text-white border-primary"
+                                : "bg-gray-100 hover:bg-primary hover:text-white border-gray-300"
+                                }`}
+                        >
+                            <span
+                                className={`inline-flex items-center justify-center w-8 h-8 mr-3 text-sm font-bold rounded-full ${userAnswers[currentQuestionIndex] === answer
+                                    ? "bg-white text-primary"
+                                    : "bg-primary text-white"
+                                    }`}
+                            >
+                                {String.fromCharCode(65 + index)}
+                            </span>
+                            <span className={`${userAnswers[currentQuestionIndex] === answer ? "text-white" : "text-black"}`}>
+                                {answer}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+        </div>
     );
 };
 
