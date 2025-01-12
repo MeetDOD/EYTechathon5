@@ -5,6 +5,7 @@ const { User } = require("../Models/user.model");
 const { Course, Content } = require("../Models/usercourse.model");
 const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
 const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn, generateDetailContentForCourseFromAI } = require("./ai.controller");
+const { addChaptersInDepthExplanation } = require("./learningpath.controller");
 require("dotenv").config();
 
 
@@ -389,7 +390,7 @@ const workFlowContentGenFn = async (req, res) => {
         console.log('Fetching relevant video for course content', userId);
         await getARelevantYtVideoForCourseContent(userId, io);
         console.log('WorkFlow content generated successfully', userId);
-        await generateDetailContentForCourseFromAI(userId);
+        await addChaptersInDepthExplanation(userId);
         console.log('WorkFlow content generated successfully', userId);
         await addRandomDurationToCourseContent();
         await courseDuration();
