@@ -247,6 +247,9 @@ const StartCourse = () => {
                                 <h2 className="text-2xl mb-3 font-bold">Detailed <span className='text-primary'>Explanation</span></h2>
                                 <ReactMarkdown className="text-lg text-justify font-medium courseSection p-4 rounded-xl">{activeChapter?.detailed_content}</ReactMarkdown>
                             </div>
+                            <div className='mb-8'>
+                                <ReactMarkdown>{activeChapter?.detailed_content}</ReactMarkdown>
+                                </div>
 
                             <div className="mb-8">
                                 <h3 className="text-2xl font-bold mb-3">Chapter <span className='text-primary'>Objectives</span></h3>

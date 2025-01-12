@@ -321,7 +321,6 @@ const generateCourseContentFromAI = async (chapters, preassessmentData, skill_na
         const result = await chatSession.sendMessage(prompt);
         const data = result.response.text();
         const cleanedData = data.replace(/```json|```/g, '');
-        console.log('cleanedData:', cleanedData);
         return JSON.parse(cleanedData);
 
     } catch (error) {

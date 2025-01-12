@@ -5,6 +5,7 @@ const { User } = require("../Models/user.model");
 const { Course, Content } = require("../Models/usercourse.model");
 const { fetchRelevantImage } = require("../utils/thumbnailGenerator");
 const { generateRespectiveSkillAssessmentFromAI, getRespectiveSkillLearningPathFromAI, generateCourseContentFromAI, getSkillsWhichUserShouldFocusOn, generateDetailContentForCourseFromAI } = require("./ai.controller");
+const { addChaptersInDepthExplanation } = require("./learningpath.controller");
 require("dotenv").config();
 
 
@@ -12,6 +13,9 @@ const addRandomDurationToCourseContent = async () => {
     try{
         const contents = await Content.find();
         for(const content of contents){
+            if(content.duration){
+                continue;
+            }
             content.duration = Math.floor(Math.random() * 41) + 10;
             await content.save();
         }
@@ -25,6 +29,9 @@ const courseDuration = async () => {
         const course = await Course.find().populate("content");
         console.log(course.length);
         for(const x of course){
+            if(x.duration){
+                continue;
+            }
             let duration = 0;
             for(const y of x.content){
                 duration += parseInt(y.duration);
@@ -35,6 +42,20 @@ const courseDuration = async () => {
     }catch(error){
         console.log(error);
     }
+}
+
+const deleteAllDataForAUser = async (userId) => {
+    
+    await Preassessment.deleteMany({user: userId });
+    await LearningPath.deleteMany({ user: userId });
+    await Assessment.deleteMany({ user: userId });
+    const course = await Course.find({ belongs_to: userId });
+    for(const x of course){
+        await Content.deleteMany({ courseId: x._id });
+    }
+    await Course.deleteMany({ belongs_to: userId });
+    await User.deleteOne({ _id: userId });
+
 }
 
 const workFlowSkillsRecommended = async (user_id, io) => {
@@ -358,12 +379,19 @@ const workFlowContentGenFn = async (req, res) => {
 
         io.to(userId).emit('log', `Generating workFlow content for user: ${userId}`);
 
+        console.log('Generating skills recommended', userId);
         await workFlowSkillsRecommended(userId, io);
+        console.log('Generating learning path', userId);
         await workFlowLearningPath(userId, io);
+        console.log('Creating all quizzes', userId);
         await workflowCreateAllQuizzes(userId, io);
+        console.log('Generating learning path content', userId);
         await workFlowGenerateLearningPathContent(userId, io);
+        console.log('Fetching relevant video for course content', userId);
         await getARelevantYtVideoForCourseContent(userId, io);
-        await generateDetailContentForCourseFromAI(userId);
+        console.log('WorkFlow content generated successfully', userId);
+        await addChaptersInDepthExplanation(userId);
+        console.log('WorkFlow content generated successfully', userId);
         await addRandomDurationToCourseContent();
         await courseDuration();
         doesUserExist.contentGenerated = true;
@@ -378,4 +406,4 @@ const workFlowContentGenFn = async (req, res) => {
     }
 };
 
-module.exports = { workFlowContentGenFn, alertGenFn,getARelevantYtVideoForCourseContent };
+module.exports = { deleteAllDataForAUser, workFlowContentGenFn, alertGenFn,getARelevantYtVideoForCourseContent };

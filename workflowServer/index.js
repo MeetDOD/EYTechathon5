@@ -1,8 +1,11 @@
 const express = require('express');
 require('dotenv').config(); 
 const app = express();
-
+const cors = require('cors');
 const PORT = process.env.PORT || 8080;
+
+app.use(cors({ origin: "*" }));
+
 
 app.get('/create', (req, res) => {
     try {
@@ -15,10 +18,8 @@ app.get('/create', (req, res) => {
         // Respond immediately
         res.status(200).json({ status: 200, message: "Request received, processing in background" });
 
-        // Background fetch with retry logic
-        const fetchWithRetry = async (retries = 3) => {
+        const fetchWithRetry = async () => {
             try {
-                console.log(process.env.WORKFLOW_SERVER);
                 const backgroundRes = await fetch(`${process.env.WORKFLOW_SERVER}/workflow/generate-workflow-content`, {
                     method: 'GET',
                     headers: {
@@ -29,12 +30,7 @@ app.get('/create', (req, res) => {
                 const response = await backgroundRes.json();
                 console.log('Background process completed:', response);
             } catch (error) {
-                if (retries > 0) {
-                    console.warn('Retrying fetch, attempts left:', retries, 'Error:', error.message);
-                    await fetchWithRetry(retries - 1); // Retry
-                } else {
-                    console.error('Background fetch failed:', error);
-                }
+                console.error('Error handling request:', error);
             }
         };
 
