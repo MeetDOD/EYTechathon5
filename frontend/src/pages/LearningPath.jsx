@@ -37,7 +37,6 @@ const LearningPath = () => {
 
                 setFeedback(response.data.preassessment.feedback.for_career_goal.skills_to_focus || []);
                 setName(response.data.preassessment.feedback.for_career_goal.name);
-                console.log(response.data);
                 setSkillsCourses(response.data.skills_courses || []);
             } catch (error) {
                 console.log(error);
@@ -136,12 +135,15 @@ const LearningPath = () => {
                                                 <span className="text-lg font-extrabold tracking-tight">
                                                     Course {index + 1}
                                                 </span>
-                                            }                                                                            >
-                                            <div className="font-bold text-xl mb-2 text-white">
-                                                {skill.skill}
-                                            </div>
-                                            <div className='font-medium text-justify text-white tracking-tight'>
-                                                {skill.why}
+                                            }
+                                        >
+                                            <div className='cursor-pointer'>
+                                                <div className="font-bold text-xl mb-2 text-white">
+                                                    {skill.skill}
+                                                </div>
+                                                <div className='font-medium text-justify text-white tracking-tight'>
+                                                    {skill.why}
+                                                </div>
                                             </div>
                                         </VerticalTimelineElement>
                                     ))}
