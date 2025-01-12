@@ -49,7 +49,7 @@ const UserLogin = () => {
                 toast.success(res.data.message);
                 setTokenState(res.data?.token);
                 localStorage.setItem("token", res.data?.token || "");
-                navigate("/dashboard");
+                navigate("/");
             } else if (res.status === 400) {
                 toast.error("User already exists");
             }
