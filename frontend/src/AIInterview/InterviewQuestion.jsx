@@ -59,6 +59,11 @@ const InterviewQuestion = () => {
         }
     };
 
+    useEffect(() => {
+        if (results.length > 0) {
+            setUserAnswer((prev) => prev + results.map((res) => res.transcript).join(' '));
+        }
+    }, [results]);
 
     const saveUserAnswer = async () => {
         if (isRecording) {
