@@ -1,6 +1,7 @@
 const LearningPath = require('../Models/learningpath.model');
 const { Preassessment } = require('../Models/preassessment.model');
 const { User } = require('../Models/user.model');
+const { Course } = require('../Models/usercourse.model');
 const { getCareerPathRecommendationFromAI, generateAIInsights, getCareerChoiceRecommendationFromAI, getSkillsWhichUserShouldFocusOn, getRespectiveSkillLearningPathFromAI } = require('./ai.controller');
 require("dotenv").config();
 
@@ -39,8 +40,7 @@ const getUserPreAssessmentData = async (req, res) => {
     try {
         const preassessment = await Preassessment.findOne({ user: req.user._id });
         if (!preassessment) {
-            return res.status(404).json
-                ({ message: "Pre-assessment data not found." });
+            return res.status(404).json({ message: "Pre-assessment data not found." });
         }
         let flag = false;
         if (preassessment.feedback.for_career_goal.skills_to_focus.length === 0) {
@@ -49,7 +49,7 @@ const getUserPreAssessmentData = async (req, res) => {
                 return {
                     skill: skill.name,
                     why: skill.description
-                }
+                };
             });
 
             if (preassessment?.feedback?.for_career_goal.name !== preassessment.user_profile.career_goal) {
@@ -58,15 +58,36 @@ const getUserPreAssessmentData = async (req, res) => {
                 await preassessment.save();
             }
         }
+
+        const skills_courses = []
+        for (const x of preassessment.feedback.for_career_goal.skills_to_focus) {
+            x._id = x._id.toString();
+            const getCoursesForTheSkills = await Course.findOne({ belongs_to: req.user._id, for_skill: x._id }).select('_id');
+            if (getCoursesForTheSkills) {
+                console.log("Course found for skill:", x.skill, getCoursesForTheSkills._id.toString());
+                skills_courses.push({
+                    skill_id: x._id,
+                    name: x.skill,  
+                    course_id: getCoursesForTheSkills._id.toString()
+                });
+                flag = true;
+            } else {
+                console.log("No course found for skill:", x.skill);
+            }
+        }
+
+
         if (flag) {
             return res.status(200).json({
                 message: "Generated pre-assessment data successfully.",
-                preassessment: preassessment
+                preassessment: preassessment,
+                skills_courses: skills_courses
             });
         } else {
             return res.status(200).json({
                 message: "Fetched pre-assessment data successfully.",
-                preassessment: preassessment
+                preassessment: preassessment,
+                skills_courses: []
             });
         }
     } catch (error) {
