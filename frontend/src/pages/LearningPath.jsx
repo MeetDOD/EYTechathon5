@@ -14,9 +14,14 @@ import icon from "../assets/timeline.png"
 const LearningPath = () => {
     const user = useRecoilValue(userState);
     const [feedback, setFeedback] = useState([]);
+    const [skillsCourses, setSkillsCourses] = useState([]);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    const handleNavigate = (id) => {
+        navigate(`/startcourse/${id}`);
+    }
 
     useEffect(() => {
         const getPreassessment = async () => {
@@ -32,6 +37,8 @@ const LearningPath = () => {
 
                 setFeedback(response.data.preassessment.feedback.for_career_goal.skills_to_focus || []);
                 setName(response.data.preassessment.feedback.for_career_goal.name);
+                console.log(response.data);
+                setSkillsCourses(response.data.skills_courses || []);
             } catch (error) {
                 console.log(error);
                 setLoading(true);
@@ -48,6 +55,7 @@ const LearningPath = () => {
             window.scrollTo(0, 0);
             document.title = `CAREERINSIGHT | ${user?.fullName?.toUpperCase()}'s LEARNING PATH`;
         }
+
     }, [user]);
 
     return (
@@ -109,6 +117,9 @@ const LearningPath = () => {
                                     {feedback.map((skill, index) => (
                                         <VerticalTimelineElement
                                             key={index}
+                                            onTimelineElementClick={() => handleNavigate(
+                                                skillsCourses.find((course) => course.skill_id === skill._id).course_id
+                                            )}
                                             contentStyle={{
                                                 background: '#7c3aed',
                                             }}
