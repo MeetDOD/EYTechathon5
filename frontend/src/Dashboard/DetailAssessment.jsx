@@ -24,8 +24,6 @@ const DetailAssessment = () => {
         }
     };
 
-
-
     const prevQuestion = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex((prev) => prev - 1);
@@ -69,7 +67,6 @@ const DetailAssessment = () => {
             [currentQuestionIndex]: answer,
         }));
     };
-
 
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
