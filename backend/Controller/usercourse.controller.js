@@ -104,7 +104,6 @@ const updateProgress = async (req, res) => {
         const userId = req.user._id;
         const { courseId, progress, activeChapterIndex } = req.body;
 
-        console.log('updateProgress', req.body);
 
         const user = await User.findById(userId);
         if (!user) {
@@ -117,10 +116,11 @@ const updateProgress = async (req, res) => {
         }
         courses.progress = progress;
         courses.activeChapterIndex = activeChapterIndex;
-        console.log('courses', courses.topic, "progress", courses.progress);
         await courses.save();
-        if(progress === 100){
+        if(progress === 100 && courses.is_completed === false){
             user.coins += 10;
+            courses.is_completed = true
+            await courses.save();
             await user.save();
         }
         res.status(200).json({ 

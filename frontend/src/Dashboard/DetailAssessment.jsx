@@ -50,7 +50,9 @@ const DetailAssessment = () => {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: JSON.stringify(submission),
+                body: JSON.stringify({
+                    answers: submission,
+                }),
             });
             const data = await res.json();
             console.log(data);
