@@ -40,9 +40,9 @@ const Features = () => {
     ];
 
     return (
-        <div className="py-12 ">
+        <div className="pb-20">
             <div>
-                <div className="text-center mb-12">
+                <div className="text-center -mt-10 mb-12">
                     <h2 className="text-3xl font-extrabold sm:text-4xl">
                         Elevate with <span className='text-primary'>Career Insight</span>
                     </h2>

@@ -1,14 +1,19 @@
 import { Button } from '@/components/ui/button';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import hero from '../assets/hero.png';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { loggedInState } from '@/store/auth';
+import videoDemo from "../assets/videoDemo.mp4"
+import videoThumbnail from "../assets/videoThumbnail.png"
+import { FaPlay } from "react-icons/fa";
 
 const Hero = () => {
     const navigate = useNavigate();
     const isLoggedIn = useRecoilValue(loggedInState);
+    const videoRef = useRef();
+    const [isPlaying, setIsPlaying] = useState(false);
 
     function handleExplore() {
         if (isLoggedIn) {
@@ -21,6 +26,29 @@ const Hero = () => {
     function handleCourse() {
         navigate("/courses");
     }
+
+    const handlePlayVideo = () => {
+        setIsPlaying(true);
+    };
+
+    useEffect(() => {
+        const videoElement = videoRef.current;
+
+        const handleScroll = () => {
+            const scrollPos = window.scrollY;
+            const scrollThreshold = 100;
+
+            if (scrollPos > scrollThreshold) {
+                videoElement.classList.add("scrolled");
+            } else {
+                videoElement.classList.remove("scrolled");
+            }
+        }
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [])
 
     return (
         <div className="overflow-hidden my-20 mb-28">
@@ -74,6 +102,42 @@ const Hero = () => {
                     </div>
                 </div>
             </div>
+
+            <div className="hero-video-wrapper">
+                <div className="flex justify-center pb-20 mt-20 hero-video" ref={videoRef}>
+                    <div className="relative">
+                        <div className="relative lg:absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 blur-2xl opacity-50"></div>
+
+                        {isPlaying ? (
+                            <video
+                                src={videoDemo}
+                                controls
+                                autoPlay
+                                className="relative w-full rounded-xl shadow-lg border-8 border-primary bg-black"
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+                        ) : (
+                            <div
+                                onClick={handlePlayVideo}
+                                className="relative w-full max-w-4xl cursor-pointer"
+                            >
+                                <img
+                                    src={videoThumbnail}
+                                    alt="Video Thumbnail"
+                                    className="w-full rounded-xl shadow-lg border-8 border-primary bg-black"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="bg-primary bg-opacity-50 rounded-full p-6 animate-pulse">
+                                        <FaPlay size={25} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };
