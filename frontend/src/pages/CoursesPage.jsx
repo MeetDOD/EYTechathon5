@@ -5,11 +5,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FaSearch } from "react-icons/fa";
 
 const CoursesPage = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedLevel, setSelectedLevel] = useState('');
+    const [selectedTopic, setSelectedTopic] = useState('');
+
     const itemsPerPage = 8;
 
     const totalPages = Math.ceil(courses.length / itemsPerPage);
@@ -36,6 +44,7 @@ const CoursesPage = () => {
                 const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/usercourse/getallcourses`);
                 const { courses: fetchedCourses } = response.data;
                 setCourses(fetchedCourses);
+                console.log(courses)
             } catch (err) {
                 toast.error("Failed to fetch courses");
             } finally {
@@ -55,6 +64,14 @@ const CoursesPage = () => {
         currentPage * itemsPerPage
     );
 
+    const filteredCourses = courses.filter(course =>
+        course.courseName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (selectedCategory ? course.category === selectedCategory : true) &&
+        (selectedLevel ? course.courseLevel === selectedLevel : true) &&
+        (selectedTopic ? course.topic === selectedTopic : true)
+    );
+
+
     useEffect(() => {
         window.scrollTo(0, 0);
         document.title = "CAREERINSIGHT | COURSES";
@@ -72,6 +89,57 @@ const CoursesPage = () => {
                     </p>
                 </div>
             </div>
+
+            <div className="flex flex-wrap gap-4 justify-center mb-10">
+                <div className="relative flex items-center max-w-3xl w-full">
+                    <FaSearch className="absolute left-3 text-primary text-lg" />
+                    <Input
+                        type="text"
+                        placeholder="Search what's in your mind..."
+                        className="inputField w-full pl-10 pr-4 py-2 rounded-lg"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <Select onValueChange={(value) => setSelectedCategory(value === "all categories" ? "" : value)}>
+                    <SelectTrigger className="w-[200px] rounded-lg inputField">
+                        <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}>
+                        <SelectItem default value="all categories">All Categories</SelectItem>
+                        {Array.from(new Set(courses.map(c => c.category))).map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select onValueChange={(value) => setSelectedLevel(value === "all levels" ? "" : value)}>
+                    <SelectTrigger className="w-[200px] rounded-lg inputField">
+                        <SelectValue placeholder="All Levels" />
+                    </SelectTrigger>
+                    <SelectContent style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}>
+                        <SelectItem value="all levels">All Levels</SelectItem>
+                        {Array.from(new Set(courses.map(c => c.courseLevel))).map(level => (
+                            <SelectItem key={level} value={level}>{level}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select onValueChange={(value) => setSelectedTopic(value === "all topics" ? "" : value)}>
+                    <SelectTrigger className="w-[200px] rounded-lg inputField">
+                        <SelectValue placeholder="All Topics" />
+                    </SelectTrigger>
+                    <SelectContent style={{ backgroundColor: `var(--background-color)`, color: `var(--text-color)` }}>
+                        <SelectItem value="all topics">All Topics</SelectItem>
+                        {Array.from(new Set(courses.map(c => c.topic))).map(topic => (
+                            <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+
             {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 8 }).map((_, index) => (
@@ -94,7 +162,7 @@ const CoursesPage = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {paginatedCourses?.map((course) => (
+                    {filteredCourses.slice(paginatedCourses)?.map((course) => (
                         <div
                             key={course._id}
                             className="p-2 shadow-md rounded-lg overflow-hidden border border-gray-300 transition duration-300 hover:-translate-y-2"
