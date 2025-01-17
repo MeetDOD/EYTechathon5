@@ -59,11 +59,6 @@ const CoursesPage = () => {
         setCurrentPage(page);
     };
 
-    const paginatedCourses = courses?.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
     const filteredCourses = courses.filter(course =>
         course.courseName.toLowerCase().includes(searchQuery.toLowerCase()) &&
         (selectedCategory ? course.category === selectedCategory : true) &&
@@ -162,41 +157,42 @@ const CoursesPage = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filteredCourses.slice(paginatedCourses)?.map((course) => (
-                        <div
-                            key={course._id}
-                            className="p-2 shadow-md rounded-lg overflow-hidden border border-gray-300 transition duration-300 hover:-translate-y-2"
-                            style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)` }}
-                        >
-                            <img
-                                src={course.thumbnail}
-                                alt={course.courseName}
-                                className="w-full rounded-lg h-40 object-cover"
-                            />
-                            <div className="py-4 space-y-2">
-                                <div className="text-lg font-bold line-clamp-2">
-                                    {course.courseName}
+                    {filteredCourses.slice((currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage)?.map((course) => (
+                            <div
+                                key={course._id}
+                                className="p-2 shadow-md rounded-lg overflow-hidden border border-gray-300 transition duration-300 hover:-translate-y-2"
+                                style={{ borderColor: `var(--borderColor)`, backgroundColor: `var(--background-color)` }}
+                            >
+                                <img
+                                    src={course.thumbnail}
+                                    alt={course.courseName}
+                                    className="w-full rounded-lg h-40 object-cover"
+                                />
+                                <div className="py-4 space-y-2">
+                                    <div className="text-lg font-bold line-clamp-2">
+                                        {course.courseName}
+                                    </div>
+                                    <div className='flex justify-between'>
+                                        <span className='text-[10px] p-1 bg-blue-100 rounded-full px-2 text-primary'>
+                                            {course.category}
+                                        </span>
+                                        <span className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
+                                            <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
+                                            {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'server is working...'}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs font-semibold text-gray-500">
+                                        Published At: {format(new Date(course.createdAt), 'MMMM d, yyyy')}
+                                    </div>
                                 </div>
-                                <div className='flex justify-between'>
-                                    <span className='text-[10px] p-1 bg-blue-100 rounded-full px-2 text-primary'>
-                                        {course.category}
-                                    </span>
-                                    <span className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
-                                        <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                        {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'server is working...'}
-                                    </span>
-                                </div>
-                                <div className="text-xs font-semibold text-gray-500">
-                                    Published At: {format(new Date(course.createdAt), 'MMMM d, yyyy')}
+                                <div>
+                                    <Link to={`/viewcourse/${course._id}/careerinsight/${course.courseName}`}>
+                                        <Button className="w-full">More Details</Button>
+                                    </Link>
                                 </div>
                             </div>
-                            <div>
-                                <Link to={`/viewcourse/${course._id}/careerinsight/${course.courseName}`}>
-                                    <Button className="w-full">More Details</Button>
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+                        ))}
                 </div>
             )
             }
