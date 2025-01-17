@@ -134,6 +134,8 @@ const updateProgress = async (req, res) => {
     }
 };
 
+const normalizeString = (str) => str.replace(/\s+/g, '').toLowerCase();
+
 const getRecommendedCourses = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -143,11 +145,13 @@ const getRecommendedCourses = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const userTechStack = user.techstack;
+        let userTechStack = user.techstack.map(normalizeString);
 
         if (!userTechStack || userTechStack.length === 0) {
             return res.status(400).json({ message: 'Tech stack is empty or not defined.' });
         }
+
+        const allCourses = await Course.find();
 
         const queryConditions = userTechStack.flatMap(stack => [
             { description: { $regex: stack, $options: 'i' } },
@@ -156,9 +160,7 @@ const getRecommendedCourses = async (req, res) => {
             { topic: { $regex: stack, $options: 'i' } },
         ]);
 
-        const recommendedCourses = await Course.find({
-            $or: queryConditions,
-        });
+        const recommendedCourses = await Course.find({ $or: queryConditions });
 
         if (recommendedCourses.length === 0) {
             return res.status(404).json({ message: 'No recommended courses found.' });

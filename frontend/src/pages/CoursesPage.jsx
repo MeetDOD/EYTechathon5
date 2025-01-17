@@ -115,7 +115,7 @@ const CoursesPage = () => {
                                     </span>
                                     <span className='font-bold text-xs flex flex-row items-center gap-1 text-green-400'>
                                         <div className="w-2 h-2 bg-green-400 rounded-full border border-green-600"></div>
-                                        {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'N/A'}
+                                        {convertMinutesToHoursCompact(parseInt(course?.duration)) || 'server is working...'}
                                     </span>
                                 </div>
                                 <div className="text-xs font-semibold text-gray-500">
