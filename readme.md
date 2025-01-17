@@ -14,6 +14,8 @@
 
 ### CareerInsight is an AI-powered platform developed as a submission for EY Techathon 5.0. The platform bridges the gap between student's current skills and their career aspirations, providing personalized, actionable guidance to help them succeed in the rapidly changing job market.
 
+https://github.com/user-attachments/assets/757803f4-d60e-4c3d-b595-8d85db64ff75
+
 ---
 
 ## **🧐 Overview**
